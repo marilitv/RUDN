@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>База знаний · Фитнес-тренер РУДН</title>
+<style>
+  :root{
+    --bg:#f6f7f4;
+    --paper:#ffffff;
+    --ink:#1b2422;
+    --ink-soft:#5b6663;
+    --ink-faint:#8b9491;
+    --line:#e0e3de;
+    --primary:#173c47;
+    --primary-tint:#e6edee;
+    --primary-tint-2:#d3e0e2;
+    --warn:#a8391f;
+    --warn-bg:#fbeae4;
+    --warn-line:#e3b39f;
+    --info:#265f75;
+    --info-bg:#e8f0f2;
+    --info-line:#b7ccd4;
+    --gold:#8a6a1f;
+    --gold-bg:#f8f0dc;
+    --gold-line:#dfc98a;
+    --ok:#3c6e4f;
+    --ok-bg:#e7f0e9;
+    --ok-line:#b7d2c1;
+    --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--primary);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+
+  /* ===== HEADER ===== */
+  header.top{
+    position:sticky; top:0; z-index:60;
+    background:var(--primary);
+    color:#fff;
+    padding:14px 32px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    box-shadow:0 2px 14px rgba(0,0,0,.12);
+  }
+  header.top .brand{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    margin-right:auto;
+  }
+  header.top .brand .kicker{
+    font-size:11.5px;
+    letter-spacing:.04em;
+    color:#a9c3c9;
+    font-weight:600;
+  }
+  header.top .brand h1{
+    font-family:var(--serif);
+    font-size:20px;
+    margin:0;
+    font-weight:700;
+    line-height:1.15;
+  }
+  .version-pill{
+    background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.25);
+    color:#e7f0e9;
+    font-size:11px;
+    padding:3px 10px;
+    border-radius:20px;
+    white-space:nowrap;
+  }
+  button.iconbtn{
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.22);
+    color:#fff;
+    border-radius:8px;
+    padding:8px 12px;
+    font-size:13px;
+    cursor:pointer;
+    font-family:var(--sans);
+    white-space:nowrap;
+  }
+  button.iconbtn:hover{background:rgba(255,255,255,.22);}
+
+  /* ===== HERO / SMART Q&A ===== */
+  .hero{
+    padding:28px 32px 6px 32px;
+    max-width:1100px;
+    margin:0 auto;
+  }
+  .hero .hero-kicker{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--ink-faint);
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  .hero h2{
+    font-family:var(--serif);
+    font-size:23px;
+    margin:0 0 12px 0;
+    color:var(--primary);
+  }
+  .qa-box{position:relative; max-width:740px; display:flex; gap:10px; align-items:stretch;}
+  .qa-box .qa-input-wrap{position:relative; flex:1;}
+  .qa-box input{
+    width:100%;
+    padding:15px 44px 15px 18px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    font-size:15.5px;
+    font-family:var(--sans);
+    box-shadow:0 1px 3px rgba(0,0,0,.05);
+  }
+  .qa-box input:focus{outline:none; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-tint);}
+  .qa-box svg{position:absolute; right:16px; top:50%; transform:translateY(-50%); opacity:.45; pointer-events:none;}
+  .qa-submit-btn{
+    flex-shrink:0;
+    background:var(--primary);
+    color:#fff;
+    border:none;
+    border-radius:14px;
+    padding:0 24px;
+    font-size:15px;
+    font-weight:700;
+    font-family:var(--sans);
+    cursor:pointer;
+    transition:background .15s, transform .1s;
+    display:flex; align-items:center; gap:8px;
+  }
+  .qa-submit-btn:hover{background:#0f2b33;}
+  .qa-submit-btn:active{transform:scale(.97);}
+  .qa-submit-btn:disabled{background:var(--ink-faint); cursor:default;}
+  .qa-hint{font-size:12.5px; color:var(--ink-faint); margin-top:8px;}
+
+  .qa-loading{display:none; align-items:center; gap:10px; color:var(--ink-soft); font-size:14.5px; margin-top:16px; max-width:740px;}
+  .qa-loading.show{display:flex;}
+  .qa-loading .dots{display:flex; gap:4px;}
+  .qa-loading .dots span{
+    width:7px; height:7px; border-radius:50%; background:var(--primary);
+    animation:qaPulse 1s infinite ease-in-out;
+  }
+  .qa-loading .dots span:nth-child(2){animation-delay:.15s;}
+  .qa-loading .dots span:nth-child(3){animation-delay:.3s;}
+  @keyframes qaPulse{0%,80%,100%{opacity:.25; transform:scale(.7);} 40%{opacity:1; transform:scale(1);}}
+  .qa-loading .scanbar{
+    flex:1; height:3px; background:var(--primary-tint-2); border-radius:3px; overflow:hidden; position:relative; max-width:200px;
+  }
+  .qa-loading .scanbar::after{
+    content:''; position:absolute; top:0; left:-40%; width:40%; height:100%;
+    background:var(--primary); border-radius:3px;
+    animation:qaScan 1.1s infinite ease-in-out;
+  }
+  @keyframes qaScan{0%{left:-40%;} 100%{left:100%;}}
+
+  .word-reveal{display:inline-block; opacity:0; transform:translateY(6px); animation:qaWordIn .38s forwards;}
+  @keyframes qaWordIn{to{opacity:1; transform:translateY(0);}}
+  .reveal-para{margin:0 0 12px 0;}
+  .reveal-para:last-child{margin-bottom:0;}
+  .script-line p{margin:0 0 10px 0;}
+  .script-line p:last-child{margin-bottom:0;}
+  .obj-text p{margin:0 0 10px 0;}
+  .obj-text p:last-child{margin-bottom:0;}
+
+  .qa-answer{
+    margin-top:16px; max-width:740px;
+    background:var(--paper); border:1px solid var(--line); border-radius:12px;
+    padding:16px 20px; display:none;
+  }
+  .qa-answer.show{display:block; animation:qaCardIn .3s ease;}
+  @keyframes qaCardIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+  .qa-answer .qa-q{font-size:12.5px; color:var(--ink-faint); margin-bottom:8px;}
+  .qa-answer .qa-body{font-size:15px; line-height:1.55;}
+  .qa-answer .qa-jump{display:inline-block; margin-top:10px; font-size:13.5px;}
+  .qa-suggestions{margin-top:12px; max-width:740px; font-size:13.5px; color:var(--ink-soft); display:none;}
+  .qa-suggestions.show{display:block;}
+  .qa-suggestions button{
+    background:var(--primary-tint); border:1px solid var(--primary-tint-2); color:var(--primary);
+    border-radius:16px; padding:6px 12px; cursor:pointer; font-size:13px; margin:4px 6px 0 0;
+  }
+  .qa-suggestions button:hover{background:var(--primary-tint-2);}
+
+  /* copy buttons on script lines */
+  .script-line{position:relative;}
+  .copy-btn{
+    position:absolute; top:8px; right:8px;
+    background:var(--paper); border:1px solid var(--line); color:var(--ink-soft);
+    font-size:11px; font-style:normal; padding:4px 9px; border-radius:6px; cursor:pointer;
+    opacity:0; transition:opacity .15s;
+  }
+  .script-line:hover .copy-btn{opacity:1;}
+  .copy-btn:hover{background:var(--primary-tint); color:var(--primary);}
+  .copy-btn.copied{opacity:1; background:var(--ok-bg); color:var(--ok); border-color:var(--ok-line);}
+
+  /* objection trainer */
+  .obj-tool{max-width:740px;}
+  .obj-box{display:flex; gap:10px; align-items:flex-start; margin-bottom:6px;}
+  .obj-box textarea{
+    flex:1; min-height:64px; padding:13px 16px; border-radius:12px; border:1px solid var(--line);
+    background:var(--paper); font-size:15px; font-family:var(--sans); resize:vertical;
+  }
+  .obj-box textarea:focus{outline:none; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-tint);}
+  .obj-result{
+    background:var(--paper); border:1px solid var(--line); border-radius:12px;
+    padding:18px 20px; margin-top:14px; display:none;
+  }
+  .obj-result.show{display:block; animation:qaCardIn .3s ease;}
+  .obj-cat{
+    display:inline-block; background:var(--primary); color:#fff; font-size:12px; font-weight:700;
+    padding:4px 12px; border-radius:20px; margin-bottom:12px;
+  }
+  .obj-row{margin-bottom:12px;}
+  .obj-row:last-child{margin-bottom:0;}
+  .obj-row .obj-label{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:4px;}
+  .obj-row .obj-text{font-size:15px; line-height:1.55; background:var(--bg); border-left:3px solid var(--primary-tint-2); padding:10px 14px; border-radius:6px; position:relative;}
+  .example-chips{display:flex; flex-wrap:wrap; gap:6px; margin:10px 0 4px 0;}
+  .example-chips button{
+    background:var(--paper); border:1px solid var(--line); border-radius:16px; color:var(--ink-soft);
+    padding:6px 12px; font-size:12.5px; cursor:pointer;
+  }
+  .example-chips button:hover{border-color:var(--primary-tint-2); color:var(--primary);}
+
+  .tag{
+    display:inline-block;
+    font-size:11px;
+    font-weight:700;
+    padding:2px 8px;
+    border-radius:20px;
+    letter-spacing:.02em;
+    margin-left:8px;
+    vertical-align:middle;
+  }
+  .tag.warn{background:var(--warn-bg); color:var(--warn); border:1px solid var(--warn-line);}
+  .tag.gold{background:var(--gold-bg); color:var(--gold); border:1px solid var(--gold-line);}
+  .tag.info{background:var(--info-bg); color:var(--info); border:1px solid var(--info-line);}
+  .tag.ok{background:var(--ok-bg); color:var(--ok); border:1px solid var(--ok-line);}
+
+  /* ===== DASHBOARD ===== */
+  .dashboard{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+    padding:20px 32px 4px 32px;
+    max-width:1100px;
+    margin:0 auto;
+  }
+  .stat-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    cursor:pointer;
+    transition:box-shadow .15s, transform .15s;
+  }
+  .stat-card:hover{box-shadow:0 6px 18px rgba(0,0,0,.07); transform:translateY(-1px);}
+  .stat-card .stat-num{font-family:var(--serif); font-size:26px; font-weight:700; line-height:1;}
+  .stat-card.warn .stat-num{color:var(--warn);}
+  .stat-card.info .stat-num{color:var(--info);}
+  .stat-card.gold .stat-num{color:var(--gold);}
+  .stat-card.ok .stat-num{color:var(--ok);}
+  .stat-card .stat-label{font-size:12px; color:var(--ink-soft); margin-top:5px;}
+
+  /* ===== TABS ===== */
+  .tabs-wrap{
+    position:sticky; top:64px; z-index:40;
+    background:var(--bg);
+    padding-top:14px;
+    border-bottom:1px solid var(--line);
+    max-width:1100px;
+    margin:0 auto;
+  }
+  .cat-tabs{display:flex; gap:6px; padding:0 32px; overflow-x:auto;}
+  .cat-tabs button{
+    background:transparent; border:none; padding:9px 4px; margin-right:22px;
+    font-family:var(--serif); font-size:16px; color:var(--ink-soft);
+    cursor:pointer; border-bottom:3px solid transparent; white-space:nowrap;
+  }
+  .cat-tabs button.active{color:var(--primary); border-bottom-color:var(--primary); font-weight:700;}
+  .sub-tabs{display:flex; gap:7px; flex-wrap:wrap; padding:11px 32px 14px 32px;}
+  .sub-tabs button{
+    background:var(--paper); border:1px solid var(--line); border-radius:20px;
+    padding:6px 14px; font-size:13.5px; color:var(--ink-soft); cursor:pointer; white-space:nowrap;
+  }
+  .sub-tabs button:hover{border-color:var(--primary-tint-2);}
+  .sub-tabs button.active{background:var(--primary); color:#fff; border-color:var(--primary); font-weight:600;}
+  .sub-tabs button .upd-dot{
+    display:inline-block; width:6px; height:6px; border-radius:50%;
+    background:var(--warn); margin-left:6px; vertical-align:middle;
+  }
+  .sub-tabs button.active .upd-dot{background:#ffd8cc;}
+
+  /* ===== MAIN / PANELS ===== */
+  main{
+    max-width:1100px;
+    margin:0 auto;
+    padding:0 32px 80px 32px;
+  }
+  .panel{display:none; max-width:840px; padding-top:28px;}
+  .panel.active{display:block; animation:fadein .25s ease;}
+  @keyframes fadein{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+
+  h2.sec-title{
+    font-family:var(--serif);
+    font-size:26px;
+    margin:0 0 6px 0;
+    color:var(--primary);
+  }
+  h3.sub-title{
+    font-family:var(--serif);
+    font-size:19px;
+    margin:26px 0 10px 0;
+    color:var(--ink);
+  }
+  h4.sub3{font-size:15px; margin:18px 0 6px 0; color:var(--ink); font-weight:700;}
+  p{margin:0 0 12px 0;}
+  .lede{color:var(--ink-soft); font-size:15px; margin-bottom:18px;}
+  .source-note{color:var(--ink-faint); font-size:12.5px; margin:-6px 0 16px 0; font-style:italic;}
+  ul.list, ol.list{margin:0 0 14px 0; padding-left:22px;}
+  ul.list li, ol.list li{margin-bottom:7px;}
+  .script-line{
+    background:var(--paper);
+    border-left:3px solid var(--primary-tint-2);
+    padding:12px 16px;
+    border-radius:6px;
+    margin:0 0 14px 0;
+    font-style:italic;
+    color:#2c3a3d;
+  }
+  .script-line .who{
+    display:block; font-style:normal; font-weight:700; font-size:12px;
+    letter-spacing:.03em; color:var(--primary); margin-bottom:4px;
+  }
+
+  .callout{border-radius:var(--radius); padding:14px 18px; margin:16px 0; border:1px solid var(--line);}
+  .callout .callout-label{font-weight:700; font-size:13.5px; display:flex; align-items:center; gap:7px; margin-bottom:6px;}
+  .callout p{margin:0 0 8px 0;}
+  .callout p:last-child{margin-bottom:0;}
+  .callout.warn{background:var(--warn-bg); border-color:var(--warn-line);}
+  .callout.warn .callout-label{color:var(--warn);}
+  .callout.info{background:var(--info-bg); border-color:var(--info-line);}
+  .callout.info .callout-label{color:var(--info);}
+  .callout.gold{background:var(--gold-bg); border-color:var(--gold-line);}
+  .callout.gold .callout-label{color:var(--gold);}
+  .callout.ok{background:var(--ok-bg); border-color:var(--ok-line);}
+  .callout.ok .callout-label{color:var(--ok);}
+
+  table{
+    width:100%; border-collapse:collapse; margin:14px 0 20px 0; font-size:14.5px;
+    background:var(--paper); border-radius:var(--radius); overflow:hidden; box-shadow:0 1px 0 var(--line);
+  }
+  table th{background:var(--primary); color:#fff; text-align:left; padding:10px 14px; font-weight:700; font-size:13px;}
+  table td{padding:10px 14px; border-bottom:1px solid var(--line); vertical-align:top;}
+  table tr:last-child td{border-bottom:none;}
+  table tr:nth-child(even) td{background:#fafaf8;}
+
+  details.faq{background:var(--paper); border:1px solid var(--line); border-radius:8px; margin-bottom:10px; padding:2px 4px;}
+  details.faq summary{
+    padding:12px 14px; cursor:pointer; font-weight:600; list-style:none;
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+  }
+  details.faq summary::-webkit-details-marker{display:none;}
+  details.faq summary::after{content:"+"; font-size:18px; color:var(--ink-faint); font-weight:400; flex-shrink:0;}
+  details.faq[open] summary::after{content:"–";}
+  details.faq .faq-body{padding:0 14px 14px 14px; color:var(--ink-soft);}
+
+  .checklist{list-style:none; margin:0; padding:0;}
+  .checklist li{
+    background:var(--paper); border:1px solid var(--line); border-radius:8px;
+    padding:11px 14px; margin-bottom:8px; display:flex; gap:10px; align-items:flex-start;
+  }
+  .checklist input[type=checkbox]{margin-top:3px; width:16px; height:16px; accent-color:var(--primary); cursor:pointer; flex-shrink:0;}
+  .checklist li.done label{text-decoration:line-through; color:var(--ink-faint);}
+  .checklist label{cursor:pointer; flex:1;}
+  .checklist .qnum{color:var(--ink-faint); font-variant-numeric:tabular-nums; margin-right:4px;}
+
+  mark{background:#ffe98a; color:inherit; border-radius:2px; padding:0 2px;}
+
+  .roster-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin:14px 0 20px 0;}
+  .roster-card{background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:11px 14px;}
+  .roster-card .r-name{font-weight:700; font-size:14.5px;}
+  .roster-card .r-role{color:var(--ink-soft); font-size:13px;}
+
+  .timeline{list-style:none; margin:16px 0 20px 0; padding:0 0 0 4px; border-left:2px solid var(--primary-tint-2);}
+  .timeline li{position:relative; padding:0 0 22px 24px;}
+  .timeline li::before{
+    content:""; position:absolute; left:-7px; top:2px; width:12px; height:12px; border-radius:50%;
+    background:var(--primary); border:2px solid var(--paper); box-shadow:0 0 0 2px var(--primary-tint-2);
+  }
+  .timeline .t-date{font-weight:700; color:var(--primary); font-size:14px; display:block; margin-bottom:2px;}
+  .timeline .t-desc{color:var(--ink-soft); font-size:14.5px;}
+
+  .rule-badges{display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 20px 0;}
+  .rule-badges span{
+    background:var(--primary-tint); color:var(--primary); font-size:13.5px;
+    padding:7px 13px; border-radius:20px; border:1px solid var(--primary-tint-2);
+  }
+
+  footer{padding:40px 32px 60px 32px; color:var(--ink-faint); font-size:13px; max-width:840px; margin:0 auto;}
+  footer hr{border:none; border-top:1px solid var(--line); margin-bottom:18px;}
+
+  #backtotop{
+    position:fixed; right:26px; bottom:26px; background:var(--primary); color:#fff; border:none;
+    width:42px; height:42px; border-radius:50%; font-size:18px; cursor:pointer;
+    box-shadow:0 6px 16px rgba(0,0,0,.25); opacity:0; transform:translateY(8px); transition:opacity .2s, transform .2s;
+  }
+  #backtotop.show{opacity:1; transform:translateY(0);}
+
+  @media(max-width:920px){
+    .dashboard{grid-template-columns:1fr 1fr;}
+    .roster-grid{grid-template-columns:1fr;}
+    header.top{flex-wrap:wrap;}
+  }
+
+  @media print{
+    header.top, .hero, .dashboard, .tabs-wrap, #backtotop{display:none !important;}
+    .panel{display:block !important; page-break-inside:avoid;}
+    main{max-width:100%;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <span class="kicker">ПРИЁМНАЯ КОМИССИЯ РУДН · Команда А.Г. Дзидзария</span>
+    <h1>База знаний — «Профессия Фитнес-тренер»</h1>
+  </div>
+  <button class="iconbtn" onclick="window.print()">Печать / PDF</button>
+</header>
+
+<div class="hero">
+  <h2>Задайте вопрос — если это есть в материалах, отвечу</h2>
+  <div class="qa-box">
+    <div class="qa-input-wrap">
+      <input type="text" id="qaInput" placeholder="Например: какой будет диплом? есть ли вычет? будет ли маркетинг?" autocomplete="off">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#173c47" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+    <button class="qa-submit-btn" id="qaBtn">Найти ответ</button>
+  </div>
+  <div class="qa-loading" id="qaLoading">
+    <div class="dots"><span></span><span></span><span></span></div>
+    <span>Ищу в базе знаний…</span>
+    <div class="scanbar"></div>
+  </div>
+  <div class="qa-answer" id="qaAnswer">
+    <div class="qa-q" id="qaQ"></div>
+    <span class="tag" id="qaTag"></span>
+    <div class="qa-body" id="qaBody" style="margin-top:8px;"></div>
+    <a href="#" class="qa-jump" id="qaJump"></a>
+  </div>
+  <div class="qa-suggestions" id="qaSuggestions"></div>
+</div>
+
+<div class="tabs-wrap">
+  <div class="cat-tabs" id="catTabs"></div>
+  <div class="sub-tabs" id="subTabs"></div>
+</div>
+
+<main id="content">
+
+      <!-- 1 -->
+      <section class="panel" id="sec1">
+        <h2 class="sec-title">1. Быстрая карточка программы</h2>
+        <table>
+          <tr><th style="width:34%">Параметр</th><th>Значение</th></tr>
+          <tr><td>Название</td><td>«Фитнес-тренер» (кафедра спортивной медицины РУДН)</td></tr>
+          <tr><td>Объём</td><td>560 академических часов, 17 обязательных блоков + необязательные блоки для самостоятельного изучения</td></tr>
+          <tr><td>Старт потока</td><td>17 ноября. Обязательные блоки открываются по порядку — прошёл один, открылся следующий</td></tr>
+          <tr><td>Формат</td><td>Полностью дистанционно: канал и чат курса (Telegram, дублируется в MAX), платформа РУДН, часть лекций живые/часть в записи, круглые столы, оффлайн-практика 1 день</td></tr>
+          <tr><td>Темп обучения</td><td>Индивидуальный по необязательным блокам. Без переносов на следующий поток, есть пересдачи</td></tr>
+          <tr><td>Документ по итогам</td><td>Диплом государственного образца (при СПО/высшем образовании) либо сертификат (только школьное образование)</td></tr>
+          <tr><td>Чек-ап</td><td><b>Исключён из этого потока</b></td></tr>
+          <tr><td>Тарифы</td><td>Тариф 1 — 220 000 ₽, Тариф 2 — 250 000 ₽</td></tr>
+          <tr><td>Эксперт</td><td>Александр Гудисович Дзидзария — д.м.н., зав. кафедрой спортивной медицины РУДН, хирург-онколог, андролог, уролог</td></tr>
+        </table>
+      </section>
+
+      <!-- 2 -->
+      <section class="panel" id="sec2">
+        <h2 class="sec-title">2. Уникальность программы</h2>
+        <ol class="list">
+          <li>Александр Гудисович — признанный авторитет для аудитории (врач-уролог/андролог, автор регулярного полезного контента о здоровье); студенты доверяют именно ему лично.</li>
+          <li>Подходит и новичкам, и действующим тренерам — материал даётся поэтапно.</li>
+          <li>Официальный диплом РУДН государственного образца по итогам обучения (при наличии СПО/высшего образования).</li>
+          <li>Одна из самых объёмных программ подготовки фитнес-тренеров на рынке РФ — 560 часов, 17 обязательных блоков.</li>
+          <li>Глубокое понимание работы тела: анатомия, физиология, женский цикл, эндокринология — тренер воспринимается клиентом как профессионал, а не просто «считает подходы».</li>
+          <li>Редкие для рынка модули: остеопатические техники, реабилитация после травм, фитнес-программирование и биомеханика, составление рационов питания.</li>
+          <li>Полностью дистанционно, из любой точки мира — есть студенты из разных стран.</li>
+          <li>Оффлайн-практика с действующим тренером — Москва, Санкт-Петербург, Екатеринбург.</li>
+          <li>Содействие в трудоустройстве — прямой контакт для отправки резюме в сеть X-Fit, студенты в приоритете (не гарантия трудоустройства).</li>
+          <li>Двуязычный диплом (рус/англ) — для лиц с иностранным или двойным гражданством.</li>
+          <li>Команда из 19+ преподавателей: практикующие врачи (кардиолог, эндокринолог, диетолог, травматолог-ортопед), тренеры, реабилитолог, маркетологи.</li>
+          <li>Готовые примеры тренировочных программ разбираются в лекциях Дмитрия Смирнова — не с нуля придётся всё разрабатывать самому.</li>
+        </ol>
+      </section>
+
+      <!-- 3 -->
+      <section class="panel" id="sec3">
+        <h2 class="sec-title">3. Программа по модулям</h2>
+
+        <h3 class="sub-title">3.1 Научно-теоретическая база</h3>
+        <ul class="list">
+          <li>Анатомия</li>
+          <li>Физиология</li>
+          <li>Спортивная физиология</li>
+          <li>Спортивная кардиология</li>
+          <li>Эндокринология</li>
+          <li>Нутрициология</li>
+          <li>Составление рационов питания (РПП) <span class="tag ok">новый блок этого потока</span></li>
+          <li>Андрология. Anti-age</li>
+          <li>ГЗТ для женщин</li>
+        </ul>
+
+        <h3 class="sub-title">3.2 Тренировочная методика и прикладная практика</h3>
+        <ul class="list">
+          <li>Биомеханика</li>
+          <li>Теория и методика фитнес-тренировки</li>
+          <li>Фитнес-программирование</li>
+          <li>Практическое планирование фитнес-тренировки — от новичка до годового макроцикла</li>
+          <li>Стретчинг в работе персонального тренера</li>
+          <li>Практическое пособие по упражнениям (готовые примеры программ разбираются в лекциях Дмитрия Смирнова)</li>
+          <li>Оффлайн-практика</li>
+        </ul>
+
+        <h3 class="sub-title">3.3 Здоровье, восстановление, питание</h3>
+        <ul class="list">
+          <li>Функциональные нарушения. Диагностика. Мобилизационные техники коррекции</li>
+          <li>Здоровая спина</li>
+          <li>Миофасциальный релиз</li>
+          <li>Реабилитация</li>
+          <li>Неотложные состояния, первая помощь</li>
+          <li>Биоимпедансный анализ состава тела</li>
+          <li>Расстройство пищевого поведения</li>
+        </ul>
+
+        <h3 class="sub-title">3.4 Профессиональное развитие и маркетинг <span class="tag gold">тариф 2</span></h3>
+        <ul class="list">
+          <li>Стратегия роста тренера</li>
+          <li>Продуктовая линейка для офлайн и онлайн</li>
+          <li>Как продавать на бесплатной тренировке</li>
+          <li>Как продавать в переписке</li>
+          <li>Внутрянка онлайн-ведения: как эффективно вести много клиентов</li>
+          <li>Упаковка профиля в Instagram и Telegram</li>
+          <li>Как продвигаться в Reels</li>
+          <li>Как делать заявки на своей базе в соцсетях через воронки</li>
+          <li>Как перевести клиентов из офлайна в онлайн</li>
+          <li>Как мотивировать клиента не сливаться и работать на результат</li>
+        </ul>
+
+        <h3 class="sub-title">3.5 Официальный порядок модулей</h3>
+        <ol class="list">
+          <li>Вводный модуль</li>
+          <li>Анатомия</li>
+          <li>Физиология</li>
+          <li>Спортивная физиология</li>
+          <li>Нутрициология</li>
+          <li>Спортивная кардиология</li>
+          <li>Эндокринология</li>
+          <li>Биоимпедансный анализ состава тела</li>
+          <li>Расстройство пищевого поведения</li>
+          <li>Андрология. Anti-age</li>
+          <li>ГЗТ для женщин</li>
+          <li>Неотложные состояния, первая помощь</li>
+          <li>Биомеханика</li>
+          <li>Теория и методика фитнес-тренировки</li>
+          <li>Фитнес-программирование</li>
+          <li>Практическое пособие по упражнениям</li>
+          <li>Функциональные нарушения. Диагностика. Мобилизационные техники коррекции</li>
+          <li>Миофасциальный релиз</li>
+          <li>Реабилитация</li>
+          <li>Стретчинг в работе персонального тренера</li>
+          <li>Базовый маркетинг</li>
+          <li>Практическое планирование фитнес-тренировки — от новичка до годового макроцикла</li>
+          <li>Профессиональный маркетинг и личный бренд</li>
+          <li>Итоговый экзамен и выпускной</li>
+        </ol>
+        <div class="callout warn">
+          <div class="callout-label">На данный момент под вопросом</div>
+          <p>Неизвестно, будет ли маркетинг отдельным тарифом 2 или войдёт в единый тариф.</p>
+        </div>
+
+        <h3 class="sub-title">3.6 Детали по преподавателям</h3>
+        <ul class="list">
+          <li>«Теория и методика фитнес-тренировки» — 4 лекции, спикер Александр Сулацкий, конспект 53 страницы + список литературы</li>
+          <li>Блок маркетинга — спикер Глеб Фостенко, включает советы по резюме/собеседованию и поведению в первые дни работы в клубе</li>
+          <li>Уроки, которые лично ведёт Александр Гудисович: Андрология. Anti-age, Дефицит тестостерона и диагностика, ГЗТ, Восстановление после курса тестостерона, Мужской anti-age (обзор), Жир в мужском организме (взгляд андролога), Спортивная фармакология (F.A.Q. для тренера), Организм мужчины, Диагностика тестостерона и гипогонадизма, ТЗТ, «Курс» и спортивная фармакология + ПКТ, БАДы и капельницы (биохакинг)</li>
+        </ul>
+
+        <div class="callout info">
+          <div class="callout-label">Пересдачи</div>
+          <p>Переноса итоговой аттестации на следующий поток нет — но есть пересдача. Обычно даются две возможности пересдачи в объявленные заранее сроки (публикуются в канале). Минимальная проходная оценка — «тройка», финальный тест из 60 вопросов (60 минут) составлен из тех же вопросов, что были в необязательных тестах после блоков.</p>
+        </div>
+      </section>
+
+      <!-- 4 -->
+      <section class="panel" id="sec4">
+        <h2 class="sec-title">4. Формат обучения и контроль</h2>
+
+        <h3 class="sub-title">4.1 Путь студента после оплаты</h3>
+        <ol class="list">
+          <li>Оплата на платформе (GetCourse) → приходит welcome-письмо со ссылкой на канал курса и контактом куратора</li>
+          <li>Вступление в канал (Telegram, дублируется в MAX на случай блокировок) — там вся вводная информация, контакт куратора, ссылка на платформу</li>
+          <li>Оплата не равна автоматическому зачислению. Нужно подготовить и отправить документы: паспорт, диплом/аттестат, заполненные бланки согласия на обработку персональных данных, СНИЛС (для внесения диплома в базу ФИС/ФРДО)</li>
+          <li>Доступ к платформе с личным кабинетом: необязательные блоки открыты сразу, обязательные — открываются по порядку</li>
+        </ol>
+
+        <h3 class="sub-title">4.2 Обязательные и необязательные блоки</h3>
+        <ul class="list">
+          <li>Необязательные блоки — открыты сразу после оплаты, можно смотреть в любое время, не входят в итоговое тестирование</li>
+          <li>Обязательные блоки (17 шт.) — открываются строго по порядку, расписание публикуется в канале</li>
+          <li>После каждого обязательного блока — необязательный тест по материалу, вопросы из него входят в итоговый экзамен</li>
+          <li>После каждого обязательного блока — круглый стол с преподавателем: вопросы собираются заранее через анкету, лектор отвечает на все</li>
+          <li>Часть обязательных блоков читается вживую (пример: анатомия, спортивная физиология, составление рационов питания, андрология — лично Александр Гудисович, ГЗТ для женщин, практика по анализам), часть — сразу в записи</li>
+          <li>Абсолютно все живые занятия сохраняются в записи на платформе</li>
+          <li>Если пропустил круглый стол — можно задать вопрос куратору, куратор передаёт преподавателю и приносит ответ</li>
+        </ul>
+
+        <h3 class="sub-title">4.3 Итоговая аттестация и пересдачи</h3>
+        <ul class="list">
+          <li>Тест: 60 вопросов, 60 минут — состоит из тех же вопросов, что были в необязательных тестах после блоков</li>
+          <li>Профиль клиента + письменная работа (план тренировок и рекомендации) + видео с демонстрацией техники упражнений</li>
+          <li>3 недели на выполнение итоговой практической работы с момента открытия задания</li>
+          <li>Проверяющий даёт обратную связь с комментариями. Минимальная проходная оценка — «тройка». В редких случаях возможен пересмотр оценки</li>
+          <li>Переносов итоговой аттестации на следующий поток нет — но даются две возможности пересдачи в объявленные сроки</li>
+        </ul>
+
+        <h3 class="sub-title">4.4 Оффлайн-практика</h3>
+        <ul class="list">
+          <li>Города: Москва, Санкт-Петербург, Екатеринбург</li>
+          <li>Один полный день, с 10:00 до 19:00</li>
+          <li>О дате и городе практики предупреждают заранее, примерно за месяц; списки желающих собираются заранее</li>
+          <li>Практика с профессиональными тренерами (визитки/фото присылают в чат заранее)</li>
+          <li>Проезд и проживание не включены в стоимость; если не поехал на практику — скидки/компенсации нет</li>
+          <li>Практика не записывается и не транслируется</li>
+          <li>При большом количестве желающих в одном городе практику делят на несколько дней</li>
+          <li>Если переживает, что пропустит технику — на курсе есть блок с видео-пособием по упражнениям</li>
+        </ul>
+
+        <h3 class="sub-title">4.5 Кураторская поддержка</h3>
+        <ul class="list">
+          <li>Один куратор ведёт все организационные вопросы (документы, зачисление, обучение) — отдельного куратора по «домашним заданиям» нет, потому что домашних заданий как таковых нет</li>
+          <li>Рабочие часы куратора: 9:00–18:00 в будни, в выходные — на связи по возможности</li>
+          <li>Чат курса — для общения между студентами. Вопросы лучше направлять напрямую куратору в личку</li>
+          <li>Онлайн-платформа РУДН — только лекции и тестирования, больше ничего</li>
+        </ul>
+
+        <h3 class="sub-title">4.6 Дополнительно</h3>
+        <ul class="list">
+          <li>Специального образования для поступления не требуется</li>
+          <li>Первых клиентов можно брать уже во время обучения — можно также составлять им рацион и питание. Расшифровка анализов даётся как навык рекомендации обратиться к профильному врачу, не как разрешение на постановку диагноза или лечение</li>
+          <li>Справка об обучении в РУДН выдаётся по запросу (для трудоустройства/учебного заведения) ещё до получения диплома на руки</li>
+        </ul>
+      </section>
+      <!-- 5 -->
+      <section class="panel" id="sec5">
+        <h2 class="sec-title">5. Документы по итогам обучения</h2>
+
+        <p>Используем формулировку: <b>диплом государственного образца</b>. Правило:</p>
+        <ul class="list">
+          <li><b>Школьное образование (только аттестат)</b> → выдаётся <b>сертификат</b></li>
+          <li><b>СПО (колледж/техникум) или высшее образование</b> → выдаётся <b>диплом государственного образца</b></li>
+        </ul>
+        <p>Диплом и сертификат по уровню документа примерно равнозначны для большинства работодателей, разница скорее психологическая/имиджевая — но некоторые работодатели могут отдавать предпочтение диплому. Не говорить, что сертификат «хуже» — говорить, что это разный формальный статус документа.</p>
+
+        <h3 class="sub-title">5.1 Если студент ещё учится (не завершил СПО/вуз)</h3>
+        <p>Можно предоставить справку об обучении в текущем учебном заведении — в этом случае студент получает <b>сертификат</b>, а после завершения своего образования может обратиться в РУДН и <b>обменять сертификат на диплом</b>.</p>
+        <p><b>Важное ограничение:</b> обмен возможен только если справка об обучении была предоставлена <i>во время</i> прохождения курса «Фитнес-тренер». Если человек прошёл курс без такой справки, а диплом о своём образовании получил через несколько лет — обменять сертификат на диплом уже нельзя: личные дела в РУДН хранятся ограниченный срок (~2 года).</p>
+
+        <h3 class="sub-title">5.2 Почему программа на сайте отличается от программы в дипломе</h3>
+        <p>Официальная программа, которая печатается в самом дипломе РУДН, значительно короче (~5 укрупнённых позиций), чем полный список фактических модулей курса (~10-13 штук) — потому что диплом обязан соответствовать утверждённой в РУДН академической программе кафедры, а фактическое содержание курса гораздо шире и глубже. Пример: в дипломе может стоять просто «Питание», а по факту это три отдельных модуля — РПП, нутрициология и составление рационов.</p>
+        <p><b>Как отвечать на это возражение:</b> «То, что мы фактически даём на курсе, физически невозможно уместить в официальную академическую программу один в один. Но по сути формулировки в дипломе означают ровно то же самое, что расписано в полной программе — просто более крупными, официальными категориями».</p>
+
+        <h3 class="sub-title">5.3 Дополнительные детали диплома</h3>
+        <ul class="list">
+          <li>Стандартная синяя корочка переподготовки — «красного диплома» (с отличием) в этой программе не предусмотрено ни при каких условиях</li>
+          <li>В дипломе указывается предыдущая специальность/профессия студента — это формат «переподготовки», а не первого образования</li>
+          <li>Двуязычный диплом (рус/англ) — только при иностранном или двойном гражданстве. Для этого нужен нотариально заверенный перевод паспорта и диплома об образовании на английский язык</li>
+          <li>Международное признание диплома — ответственность студента: в одних странах российский диплом гособразца признаётся напрямую, в других требует дополнительного подтверждения/нострификации</li>
+        </ul>
+
+        <h3 class="sub-title">5.4 Выдача диплома — процесс</h3>
+        <ul class="list">
+          <li>РУДН готовит и печатает диплом после сдачи экзаменов</li>
+          <li>Получение: лично на выпускном, либо диплом отправляют почтой, либо забирает и пересылает кафедра — по договорённости с куратором</li>
+          <li>Справку об обучении (для трудоустройства/учебного заведения) можно получить по запросу ещё до получения диплома на руки</li>
+        </ul>
+
+        <h3 class="sub-title">5.5 Возврат средств при отказе от обучения</h3>
+        <ul class="list">
+          <li>Оформляется через куратора: студент пишет заявление на возврат</li>
+          <li>Возвращается сумма за вычетом стоимости уже полученного материала и комиссий платёжных систем</li>
+          <li>Полного возврата после начала обучения не будет — только остаток за вычетом использованного</li>
+        </ul>
+      </section>
+
+      <!-- 6 -->
+      <section class="panel" id="sec6">
+        <h2 class="sec-title">6. Александр Гудисович Дзидзария</h2>
+        <p>Заведующий кафедрой спортивной медицины и физкультурно-оздоровительных технологий РУДН. Руководитель и научный куратор программы «Фитнес-тренер». Лично участвует в создании программы, отборе преподавателей и проводит финальную встречу со студентами.</p>
+
+        <h3 class="sub-title">6.1 Биография</h3>
+        <ul class="list">
+          <li>Доктор медицинских наук</li>
+          <li>Заведующий отделением онкоурологии и онкогинекологии</li>
+          <li>Хирург-онколог, андролог, уролог, организатор здравоохранения</li>
+          <li>6 сезонов соревнований по бодибилдингу: классический бодибилдинг до 95 кг, Менс Физик</li>
+          <li>Наставник чемпионов и абсолютных чемпионов Москвы, Санкт-Петербурга, России, Арнольд Классик Европа</li>
+          <li>Основатель проекта по трансформации мужчин «Фитнес Как Наука»</li>
+          <li>6 лет в бразильском джиу-джитсу, пурпурный пояс, выступающий атлет</li>
+          <li>15 лет медицинского стажа, помог более 5000 спортсменам изменить форму и добиться новых результатов</li>
+        </ul>
+
+        <h3 class="sub-title">6.2 Уроки, которые ведёт лично</h3>
+        <ul class="list">
+          <li>Андрология. Anti-age</li>
+          <li>Дефицит тестостерона, диагностика</li>
+          <li>ГЗТ</li>
+          <li>Восстановление после курса тестостерона</li>
+          <li>Мужской anti-age. Обзор</li>
+          <li>Жир в мужском организме. Взгляд андролога</li>
+          <li>Спортивная фармакология. F.A.Q. для тренера</li>
+          <li>Организм мужчины</li>
+          <li>Диагностика. Тестостерон и гипогонадизм</li>
+          <li>ТЗТ</li>
+          <li>«Курс» и спортивная фармакология + ПКТ</li>
+          <li>БАДы / капельницы. Биохакинг</li>
+        </ul>
+
+        <h3 class="sub-title">6.3 Отношение аудитории</h3>
+        <ul class="list">
+          <li>Аудитория относится к Александру Гудисовичу с большим уважением — воспринимает его как авторитет, обращается на «Вы», на выпускном к нему выстраивается очередь пообщаться</li>
+          <li>У него есть собственный суббренд витаминов — часть аудитории уже принимает их и делится позитивным опытом</li>
+          <li>Студенты иногда додумывают за него — «Александр же сказал» — даже если он этого не говорил. Если клиент ссылается на слова эксперта, которые вы не можете подтвердить — лучше уточнить у команды, а не подтверждать/опровергать наугад</li>
+        </ul>
+
+        <h3 class="sub-title">6.4 Официальные каналы</h3>
+        <ul class="list">
+          <li>Личный сайт: <a href="https://doctordzari.ru/" target="_blank" rel="noopener">doctordzari.ru</a></li>
+          <li>Telegram (публичный канал): <a href="https://t.me/DrDzari" target="_blank" rel="noopener">t.me/DrDzari</a></li>
+          <li>Telegram (с прогревом): <a href="https://t.me/+d-DJU9XHf3xhMGZi" target="_blank" rel="noopener">t.me/+d-DJU9XHf3xhMGZi</a></li>
+          <li>Instagram: <a href="https://www.instagram.com/dzari.alex" target="_blank" rel="noopener">instagram.com/dzari.alex</a></li>
+        </ul>
+      </section>
+
+      <!-- 7 -->
+      <section class="panel" id="sec7">
+        <h2 class="sec-title">7. Команда преподавателей</h2>
+        <div class="roster-grid">
+          <div class="roster-card"><div class="r-name">Александр Дзидзария</div><div class="r-role">Заведующий кафедрой</div></div>
+          <div class="roster-card"><div class="r-name">Владислав Лапшин</div><div class="r-role">Руководитель проекта</div></div>
+          <div class="roster-card"><div class="r-name">Надирбек Дыдымов</div><div class="r-role">Врач-терапевт</div></div>
+          <div class="roster-card"><div class="r-name">Юсуп Хатаев</div><div class="r-role">Кардиолог</div></div>
+          <div class="roster-card"><div class="r-name">Юлия Руднева</div><div class="r-role">Эндокринолог</div></div>
+          <div class="roster-card"><div class="r-name">Руслан Шипицын</div><div class="r-role">Травматолог-ортопед</div></div>
+          <div class="roster-card"><div class="r-name">Дмитрий Бачин</div><div class="r-role">Спортивный физиолог</div></div>
+          <div class="roster-card"><div class="r-name">Наталия Герасимова</div><div class="r-role">Врач-диетолог, терапевт</div></div>
+          <div class="roster-card"><div class="r-name">Анатолий Канунов</div><div class="r-role">Реабилитолог, преподаватель</div></div>
+          <div class="roster-card"><div class="r-name">Евгений Паньшин</div><div class="r-role">Преподаватель анатомии</div></div>
+          <div class="roster-card"><div class="r-name">Александр Сулацкий</div><div class="r-role">Инструктор (теория и методика фитнес-тренировки)</div></div>
+          <div class="roster-card"><div class="r-name">Дмитрий Смирнов</div><div class="r-role">Фитнес-тренер, преподаватель РУДН — в его лекциях даются готовые примеры тренировочных программ</div></div>
+          <div class="roster-card"><div class="r-name">Алексей Кузнецов</div><div class="r-role">Тренер</div></div>
+          <div class="roster-card"><div class="r-name">Алина Погосян</div><div class="r-role">Фитнес-тренер</div></div>
+          <div class="roster-card"><div class="r-name">Юлия Кашляк</div><div class="r-role">Фитнес-тренер</div></div>
+          <div class="roster-card"><div class="r-name">Богдан Величко</div><div class="r-role">Фитнес-тренер</div></div>
+          <div class="roster-card"><div class="r-name">Ярослав Бражников</div><div class="r-role">Фитнес-тренер</div></div>
+          <div class="roster-card"><div class="r-name">Александр Гурьев</div><div class="r-role">Фитнес-тренер</div></div>
+          <div class="roster-card"><div class="r-name">Глеб Фостенко</div><div class="r-role">Маркетолог — блок «Профессиональный маркетинг и личный бренд»</div></div>
+          <div class="roster-card"><div class="r-name">Глеб Парфенов</div><div class="r-role">Маркетолог</div></div>
+        </div>
+      </section>
+      <!-- 8 -->
+      <section class="panel" id="sec8">
+        <h2 class="sec-title">8. Оплата</h2>
+
+        <h3 class="sub-title">8.1 Способы оплаты</h3>
+        <ul class="list">
+          <li>Оплата картой РФ и зарубежной картой — через ГК/ePay, для зарубежных карт также Клауд и Lava Top</li>
+          <li>Банковская рассрочка — через партнёра «Фреш», проценты ложатся на клиента, срок до 12 месяцев</li>
+          <li>Внутренняя рассрочка компании — есть процент, чем короче срок рассрочки, тем лучше для компании — приоритет коротким срокам</li>
+          <li>Оплата по счёту — доступна, нужны полные банковские реквизиты клиента</li>
+        </ul>
+
+        <h3 class="sub-title">8.2 Приоритетность способов оплаты</h3>
+        <ol class="list">
+          <li>Оплата по карте</li>
+          <li>Банковская рассрочка до 12 месяцев (через «Фреш»)</li>
+          <li>Внутренняя рассрочка на 2 части (первый платёж сразу, второй — через месяц)</li>
+          <li>Внутренняя рассрочка до 4 месяцев (после отказа по банковской рассрочке)</li>
+          <li>Внутренняя рассрочка до 8 месяцев — самый нежелательный вариант, маленькие платежи, сложно собирать</li>
+        </ol>
+
+        <h3 class="sub-title">8.3 Важный нюанс — оплата картой</h3>
+        <p>При оплате по карте в списке способов у клиента может отображаться рассрочка от Тинькофф. Обязательно предупреждать клиента выбирать именно способ оплаты картой, а не рассрочку.</p>
+
+        <h3 class="sub-title">8.4 Проведение оплаты через сторонние сервисы</h3>
+        <p>Если оплата не проходит автоматически через ГК — вносить в систему через «Другое» в GetCourse, указав в комментариях, где именно была произведена оплата.</p>
+
+        <h3 class="sub-title">8.5 Прочие орг. моменты</h3>
+        <ul class="list">
+          <li>Бронь, принятая менеджером — ставить тег «Бронь». Бронь = 5 000 ₽, возвратная, сохраняет цену и бонусы на момент брони, вычитается из итоговой стоимости при полной оплате</li>
+          <li>Оплата по счёту — реквизиты, тариф и сумму присылать ответственному</li>
+        </ul>
+
+        <h3 class="sub-title">8.6 Про договор при оплате</h3>
+        <p>Оплата оформляется через ИП-партнёра — <b>ИП Лапшин Владислав Владимирович</b>, он же руководитель проекта. После оплаты клиент заполняет заявление на приём в РУДН, затем формируется список студентов, который передаётся в РУДН как субподрядчику по оказанию части услуг. По запросу можно получить справку о зачислении. Если студенты просят показать оферту — ничего не скрываем, пересылаем.</p>
+
+        <h3 class="sub-title">8.7 Почему нет налогового вычета</h3>
+        <p>У РУДН есть образовательная лицензия, но деньги студента идут не напрямую в РУДН, а через ИП-партнёра — из-за этой схемы налоговый вычет невозможен. Взамен курс даёт бонусы, которых не даст напрямую кафедра (приоритет в трудоустройстве, партнёрские бонусы и т.д.).</p>
+
+        <h3 class="sub-title">8.8 Возврат средств при отказе от обучения</h3>
+        <ul class="list">
+          <li>Клиент пишет заявление на возврат куратору</li>
+          <li>Возвращается сумма за вычетом стоимости уже полученного материала и комиссий платёжных систем</li>
+          <li>Полного возврата после начала обучения не будет</li>
+        </ul>
+      </section>
+
+      <!-- 9 -->
+      <section class="panel" id="sec9">
+        <h2 class="sec-title">9. Тарифы</h2>
+
+        <h3 class="sub-title">9.1 Наполнение тарифов</h3>
+        <table>
+          <tr><th>Тариф 1</th><th>Тариф 2</th></tr>
+          <tr><td>Научно-теоретическая база</td><td>Всё из Тарифа 1</td></tr>
+          <tr><td>Тренировочная методика и прикладная практика</td><td>+ маркетинг на глубоком уровне, построение личного бренда, применение на практике</td></tr>
+          <tr><td>Блоки о здоровье, восстановлении и питании</td><td></td></tr>
+          <tr><td>Доступ к материалам — 6 месяцев после программы</td><td>Доступ к материалам — 1 год после программы</td></tr>
+        </table>
+        <p>Тариф 1 закрывает всё необходимое для работы фитнес-тренером, инструктором, методистом, преподавателем физкультуры. Тариф 2 добавляет углублённый маркетинг и построение личного бренда.</p>
+        <div class="callout warn">
+          <div class="callout-label">На данный момент под вопросом</div>
+          <p>Неизвестно, останется ли маркетинг отдельным вторым тарифом или войдёт в единый тариф.</p>
+        </div>
+
+        <h3 class="sub-title">9.2 Стоимость</h3>
+        <table>
+          <tr><th>Тариф</th><th>Полная стоимость</th><th>Рассрочка от банка</th></tr>
+          <tr><td>Тариф 1</td><td>220 000 ₽</td><td>19 588 ₽ × 12 мес.</td></tr>
+          <tr><td>Тариф 2</td><td>250 000 ₽</td><td>22 000 ₽ × 12 мес.</td></tr>
+        </table>
+
+        <h3 class="sub-title">9.3 Бонусы старта</h3>
+        <ul class="list">
+          <li>51-му оплатившему — книга Александра Гудисовича «Генезис» с личным автографом</li>
+          <li>Бесплатный доступ в приложение «ФКН» / «Фитнес Как Наука» (тренировки, питание, ИИ-анализ калорийности по фото) — доступ ограничен по сроку</li>
+          <li>Бонусы будут постепенно сокращаться по мере продвижения окна продаж</li>
+        </ul>
+        <p>Лимит мест на поток — ориентировочно 200.</p>
+      </section>
+
+      <!-- 10 -->
+      <section class="panel" id="sec10">
+        <h2 class="sec-title">10. Tone of Voice</h2>
+        <ul class="list">
+          <li>Стиль: официально-дружелюбный, уважительный, поддерживающий</li>
+          <li>Обращение: всегда на «Вы»</li>
+          <li>Упоминание эксперта: только имя-отчество либо ФИО полностью</li>
+          <li>Эмоции: профессиональный, тёплый и мотивирующий тон, без излишней строгости</li>
+          <li>Смайлы: допустимы редко, не чаще одного за сообщение, только нейтральные (например 🙌🏻)</li>
+          <li>Описание в WhatsApp: «Приёмная комиссия РУДН»</li>
+        </ul>
+        <p>«Мы классный, мощный курс, но мы вам не втюхиваем. Хотите — приходите и учитесь, покупайте. Не хотите — окей, нам и не надо.» Позиционирование — кафедра/институт с элементом отбора: приёмная комиссия, экспресс-тестирование бэкграунда и целей, вежливый, но не заискивающий тон.</p>
+        <p>Берём не всех: если клиент на этапе продажи уже проявляет признаки будущих проблем (жалуется заранее на технические сложности, ищет поводы для будущих претензий) — лучше не связываться, такие клиенты чаще просят возврат/перенос и портят репутацию эксперта жалобами напрямую ему.</p>
+      </section>
+      <!-- 11 -->
+      <section class="panel" id="sec11">
+        <h2 class="sec-title">11. Скрипт для звонка</h2>
+
+        <h3 class="sub-title">11.1 Приветствие</h3>
+        <div class="script-line"><p>«ИМЯ, здравствуйте! Это ИМЯ из приёмной комиссии РУДН, команда Александра Гудисовича Дзидзария. Вы оставили анкету на нашу программу по профессии Фитнес-тренер, всё верно?»</p></div>
+
+        <h3 class="sub-title">11.2 Программирование звонка</h3>
+        <div class="script-line"><p>«Отлично! Мы проводим собеседования, чтобы понять уровень вашей мотивации и готовности к обучению, а также расскажем о программе, и вы сможете принять решение, подходит вам формат и нагрузка.»</p><p>«Скажите, готовы ли вы ответить на несколько вопросов и рассказать о себе и своих целях на обучение?»</p></div>
+
+        <h3 class="sub-title">11.3 Уточняющие вопросы</h3>
+        <div class="script-line">«Отлично. Подскажите, пожалуйста:»</div>
+        <ul class="list">
+          <li>В какой сфере вы сейчас работаете?</li>
+          <li>Есть ли у вас опыт работы в фитнесе? Если да — какой?</li>
+          <li>Хотите пройти программу для профессионального роста или больше для личного развития?</li>
+          <li>Какая ваша главная цель прохождения программы?</li>
+          <li>Сколько времени в неделю готовы уделять обучению?</li>
+        </ul>
+
+        <h3 class="sub-title">11.4 Презентация программы</h3>
+        <div class="script-line"><p>«ИМЯ, благодарим за ответы. Ваш опыт и мотивация понятны. С уверенностью можем сказать, что программа «Фитнес-тренер» полностью вам подходит! Расскажу подробнее, чем программа будет полезна именно вам.</p><p>Наша программа сочетает теорию и практику: онлайн-лекции и уроки на платформе, круглые столы с лекторами, а также офлайн-практику с тренером в фитнес-клубе.</p><p>Вы обретёте глубокие знания о работе организма: анатомия, физиология, женский цикл, влияние тренировок на здоровье и нутрициология. Клиент будет ощущать, что вы заботитесь о здоровье, а не просто считаете подходы.»</p></div>
+        <p><b>Особое внимание уделяется:</b></p>
+        <ul class="list">
+          <li>Фитнес-программированию и биомеханике — точный подбор упражнений под цели и возможности клиента</li>
+          <li>Гормонозаместительной терапии у женщин и мужчин, андрологии и anti-age</li>
+          <li>Остеопатическим техникам и реабилитации после травм, снижению риска повторных травм</li>
+        </ul>
+        <div class="script-line"><p>«Программа построена по этапам с разнообразием модулей, чтобы материал усваивался максимально эффективно. Кураторы сопровождают вас на протяжении всего обучения.</p><p>Программа реализуется при поддержке РУДН, диплом государственного образца подтверждает квалификацию. Наше обучение построено под руководством и репутацией Александра Гудисовича Дзидзария, что добавляет ценность вашему профессиональному статусу.</p><p>Помимо профессиональных знаний, вы освоите основы маркетинга, продаж и психологии общения: как формировать личный бренд, работать в соцсетях, привлекать клиентов и строить долгосрочные отношения с ними. Это важная часть профессии, которая позволит не только тренировать, но и стабильно зарабатывать.</p><p>Резюмируя, вы получаете комплексную подготовку, которая позволит уверенно работать с людьми — как очно, так и онлайн. После окончания программы мы оказываем содействие в трудоустройстве.»</p></div>
+        <div class="script-line">«ИМЯ, есть ли у вас дополнительные вопросы, или рассказываю об организационных моментах?»</div>
+
+        <h3 class="sub-title">11.5 Организационные моменты</h3>
+        <div class="script-line"><p>«Отлично! Обучение начинается 17 ноября. Программа длится 560 часов. Новые блоки открываются по порядку — прошли один, открылся следующий, всего у нас 17 обязательных блоков, с которыми вы сможете ознакомиться на сайте после разговора.</p><p>Обучение проходит в индивидуальном темпе по необязательным блокам — без жёстких дедлайнов. У вас будет информационный канал в Telegram с расписанием и всей важной информацией.</p><p>После каждого блока вы можете пройти тест и проверить свои знания. В каждом блоке проходит «круглый стол» с преподавателем, на котором он ответит на все важные вопросы.</p><p>В конце программы — итоговый экзамен, который состоит из обязательного теста и практического задания. Практическое задание включает в себя письменную работу (вы получите профиль клиента и нужно будет составить для него план тренировки, дать рекомендации) и видео-работу (нужно будет снять видео техники выполнения упражнений).»</p></div>
+        <div class="script-line">«ИМЯ, поделитесь, какие вопросы у вас остались по наполнению программы?»</div>
+
+        <h3 class="sub-title">11.6 Тарифы</h3>
+        <div class="script-line">«Отлично, тогда переходим к тарифам. Рассказываю. У нас 2 тарифа.»</div>
+        <table>
+          <tr><th>Тариф 1</th><th>Тариф 2</th></tr>
+          <tr><td>Научно-теоретическая база</td><td>Всё из Тарифа 1</td></tr>
+          <tr><td>Тренировочная методика и прикладная практика</td><td>+ маркетинг на глубоком уровне, построение личного бренда, сразу применяете на практике</td></tr>
+          <tr><td>Блоки о здоровье, восстановлении и питании</td><td></td></tr>
+          <tr><td>Доступ к материалам — 6 месяцев после программы</td><td>Доступ к материалам — 1 год после программы</td></tr>
+        </table>
+        <p>«Всё, что нужно для успешной работы как фитнес-тренером, так и инструктором, методистом и преподавателем физкультуры.» Тариф 2 добавляет углублённый маркетинг и построение личного бренда.</p>
+        <div class="script-line">«Подскажите, какой вам больше подходит и нравится?»</div>
+
+        <h3 class="sub-title">11.7 Стоимость</h3>
+        <div class="script-line">«Отлично. Сейчас доступно раннее бронирование, и для вас действуют лучшие условия.»</div>
+        <table>
+          <tr><th>Тариф</th><th>Полная стоимость</th><th>Рассрочка от банка</th></tr>
+          <tr><td>Тариф 1</td><td>220 000 ₽</td><td>19 588 ₽ × 12 мес.</td></tr>
+          <tr><td>Тариф 2</td><td>250 000 ₽</td><td>22 000 ₽ × 12 мес.</td></tr>
+        </table>
+        <div class="script-line">«Анна, благодарю за все ответы и с удовольствием приглашаем вас на программу. Готовы записываться и оплачивать, или остались какие-то вопросы?»</div>
+
+        <h3 class="sub-title">11.8 Оплата</h3>
+        <div class="script-line">«Отлично! Подскажите, оплата будет в рассрочку или по карте?»</div>
+        <p>Дальше — переход в переписку для отправки ссылки на оплату и оформления документов.</p>
+
+        <h3 class="sub-title">11.9 Голосовая почта / автоответчик</h3>
+        <p>Если звонок ушёл на автоответчик — не молчать и не сбрасывать, оставить короткое голосовое сообщение, чтобы клиент увидел пропущенный вызов и услышал контекст:</p>
+        <div class="script-line">«ИМЯ, добрый день! Это ИМЯ из приёмной комиссии РУДН по программе «Фитнес-тренер». Не смог(ла) дозвониться — перезвоню чуть позже, либо буду рад(а), если наберёте сами. Хорошего дня!»</div>
+
+        <h3 class="sub-title">11.10 Перенос звонка на другое время</h3>
+        <p>Если клиент поднял трубку, но занят прямо сейчас — не пытаться удержать разговор силой, лучше зафиксировать точное время следующего звонка:</p>
+        <div class="script-line">«Понимаю, сейчас неудобно. Подскажите, во сколько вам будет комфортно поговорить сегодня или завтра? Я вам перезвоню точно в это время.»</div>
+
+        <h3 class="sub-title">11.11 Финальный дожим в конце звонка</h3>
+        <p>Если после презентации и тарифов клиент колеблется («надо подумать») — прежде чем переходить к отработке возражения, можно мягко обозначить ценность решения именно сейчас:</p>
+        <div class="script-line">«Понимаю, что решение важное. Хочу отметить: сейчас действует период раннего бронирования — можно закрепить за собой место и текущие условия, а окончательно определиться с деталями уже после. Хотите, я зафиксирую место, пока вы принимаете решение?»</div>
+      </section>
+
+      <!-- 12 -->
+      <section class="panel" id="sec12">
+        <h2 class="sec-title">12. Переписка</h2>
+
+        <h3 class="sub-title">12.1 Первое сообщение — тёплые/холодные, было первое касание</h3>
+        <div class="script-line"><p>«ИМЯ, добрый день! Готов(а) сообщить, что мы официально открыли набор на программу Александра Гудисовича Дзидзария по профессии «Фитнес-тренер». В вашей анкете вы указали, что хотите узнать детали нашей программы.</p><p>Мы стремимся собрать комьюнити активных, ответственных и целеустремлённых людей, поэтому внимательно относимся к этапу поступления. Скажите, готовы ли вы ответить на несколько вопросов и рассказать о себе и своих целях на обучение, а также узнать о программе подробнее?»</p></div>
+
+        <h3 class="sub-title">12.2 Первое сообщение — не было первого касания</h3>
+        <div class="script-line"><p>«Здравствуйте, Имя! Меня зовут Имя, я специалист приёмной комиссии в РУДН — кафедра спортивной медицины под руководством Александра Гудисовича Дзидзария, специальность «Фитнес-тренер» 🎓 Вы оставляли заявку в анкету предварительной записи на курс, и я хотел уточнить ваш запрос, чтобы понять, подходит ли вам обучение в этом потоке.</p><p>Сейчас мы проводим короткие собеседования — они помогают определить, насколько программа соответствует целям абитуриента. Подскажите, что именно хотели получить от обучения? Могу сориентировать вас и ответить на вопросы здесь или на коротком звонке, как вам будет удобно?»</p></div>
+
+        <h3 class="sub-title">12.3 Для броней (неоплаченных)</h3>
+        <div class="script-line"><p>«Анна, добрый день! На связи приёмная комиссия РУДН, команда Александра Гудисовича Дзидзария. Это ИМЯ, я буду вашим помощником на этапе поступления на программу. Благодарим за проявленный интерес и оставленную заявку на бронь.</p><p>Мы стремимся собрать комьюнити активных, ответственных и целеустремлённых людей, поэтому внимательно относимся к этапу поступления. Скажите, готовы ли вы ответить на несколько вопросов и рассказать о себе и своих целях на обучение?»</p></div>
+        <p>Бронь — 5 000 ₽, возвратная. Сохраняет стоимость и все бонусы, актуальные на момент брони. При полной оплате бронь вычитается из итоговой стоимости курса.</p>
+
+        <h3 class="sub-title">12.4 Повторное касание при отсутствии ответа</h3>
+        <div class="script-line"><span class="who">Короткий вариант</span><p>«Имя, здравствуйте! Это имя из приёмной комиссии. Вы оставляли анкету предзаписи на программу «Профессия Фитнес-тренер». Не получил ваш ответ. Увидели сообщение?»</p></div>
+        <div class="script-line"><span class="who">С приглашением на эфир</span><p>«Добрый день, Имя! Вас приветствует приёмная комиссия РУДН, команда Александра Гудисовича Дзидзария. Меня зовут [Имя менеджера], я ваш куратор на этапе поступления на программу «Фитнес-тренер».</p><p>Вы оставляли заявку на обучение, и уже [дата] Александр Гудисович лично проведёт открытый эфир для будущих студентов. На встрече вы узнаете: как проходит обучение в РУДН, какие дисциплины и преподаватели будут в новом потоке, какие возможности и результаты получают выпускники.</p><p>Эфир бесплатный и пройдёт в Telegram. Ссылка будет размещена в канале предзаписи за несколько часов до начала. ИМЯ, подтвердите, пожалуйста, будете ли вы на эфире? Это важно, чтобы сохранить за вами приоритет поступления.»</p></div>
+        <div class="script-line"><span class="who">При недозвоне</span>«Имя, здравствуйте! Не дозвонился до вас. Скоро начинается наша программа. Давайте договоримся с вами о звонке, во сколько вам будет удобно?»</div>
+
+        <h3 class="sub-title">12.5 Оплата — пересылка ссылки</h3>
+        <div class="script-line">«Отлично! Подскажите, оплата будет в рассрочку или по карте?»</div>
+        <p><b>Если по карте:</b></p>
+        <div class="script-line">«Отправляю вашу ссылку на оплату — [ссылка]. По ссылке выбираете удобный для вас способ. Важный момент — выбирайте способы оплаты: банковской картой, картой не РФ, T-Pay или SberPay. Вы готовы оплачивать сейчас? Проверю поступление и поздравлю Вас!»</div>
+        <p><b>Если в рассрочку:</b></p>
+        <div class="script-line">«Отправляю вашу ссылку на оплату — [ссылка]. По ссылке выбираете рассрочку от наших партнёров — банковскую рассрочку через Фреш. После заполнения анкеты с вами свяжется менеджер и поможет всё оформить! Вы готовы заняться оформлением сейчас?»</div>
+        <p><b>Если зарубежная карта:</b></p>
+        <div class="script-line">«Для зарубежных карт у нас есть отдельный способ оплаты — через Клауд или Lava Top. Отправляю вам подходящую ссылку.»</div>
+
+        <h3 class="sub-title">12.6 Орг. моменты по документам</h3>
+        <div class="script-line"><p>«Также важный момент, вам нужно будет заполнить заявление о зачислении на обучение и согласие на обработку персональных данных — все образцы вы найдёте в информационном канале обучения, а также на платформе. По всем вопросам сможете обратиться к вашему куратору.</p><p>Подготовьте, пожалуйста, копию диплома о высшем или среднем специальном образовании. СНИЛС (для граждан РФ).»</p></div>
+        <ul class="list">
+          <li>Если в дипломе и паспорте не совпадают фамилии — нужны документы о смене ФИО</li>
+          <li>Если документ на иностранном языке — нотариально заверенный перевод на русский и на английский (диплом двуязычный для иностранных студентов)</li>
+          <li>Если иностранный документ не подпадает под международные договоры о взаимном признании — нужна нострификация диплома</li>
+        </ul>
+        <div class="script-line">«Подскажите, все документы из списка у вас есть?»</div>
+        <div class="script-line"><span class="who">Если нет диплома</span>«В случае отсутствия диплома, подтверждающего высшее/среднее специальное образование, выпускной документ — сертификат об обучении. Диплом получают те, у кого подтверждено высшее или среднее специальное образование!»</div>
+
+        <h3 class="sub-title">12.7 После оплаты</h3>
+        <div class="script-line">«Анна, получили вашу оплату. Поздравляем вас и добро пожаловать на программу «Фитнес-тренер» 🎓 После оплаты вам должно прийти письмо на почту с первыми инструкциями (ссылка на канал курса и контакт куратора). Обязательно вступайте в информационный канал курса, там будет вся актуальная информация.»</div>
+        <p>Важно проговорить: после оплаты нужно ещё отправить документы для зачисления — без этого зачисление на кафедру не произойдёт, а значит и диплом не будет оформлен.</p>
+
+        <h3 class="sub-title">12.8 Напоминание, если ссылку на оплату не оплатили</h3>
+        <p>Если прошло несколько часов после отправки ссылки, а оплата не пришла — не пропадать молча, но и не давить: короткое ненавязчивое напоминание.</p>
+        <div class="script-line">«ИМЯ, подскажите, получилось перейти по ссылке? Если появились вопросы по способу оплаты — с радостью помогу, или пришлю другую ссылку, если что-то не сработало.»</div>
+
+        <h3 class="sub-title">12.9 Если документы не прислали вовремя</h3>
+        <p>Оплата прошла, но студент затягивает с отправкой документов — мягкое напоминание с объяснением, зачем это нужно:</p>
+        <div class="script-line">«ИМЯ, добрый день! Напоминаю: для зачисления на кафедру нужны документы (паспорт, диплом/аттестат, согласие на обработку персональных данных, СНИЛС). Без них, к сожалению, зачисление и оформление диплома не состоятся. Пришлите, пожалуйста, когда будет удобно — помогу, если возникнут вопросы.»</div>
+
+        <h3 class="sub-title">12.10 Просьба порекомендовать (через несколько недель обучения)</h3>
+        <p>Хороший момент попросить рекомендацию — когда студент уже прошёл несколько блоков и доволен процессом. Не использовать сразу после оплаты.</p>
+        <div class="script-line">«ИМЯ, рада слышать, что обучение нравится! Если среди знакомых есть кто-то, кому был бы интересен такой курс — буду благодарна за рекомендацию, с удовольствием отвечу на их вопросы так же подробно, как отвечала на ваши.»</div>
+      </section>
+      <!-- 13 -->
+      <section class="panel" id="sec13">
+        <h2 class="sec-title">13. Отработка возражений</h2>
+        <p class="lede">Всегда опирайтесь на ситуацию конкретного клиента и его потребности. Выявляйте истинное возражение уточняющим вопросом, прежде чем отрабатывать. Приведённые ниже отработки — не для копипаста, а опорный каркас смыслов.</p>
+
+        <details class="faq" open>
+          <summary>«Не будет времени учиться»</summary>
+          <div class="faq-body">
+            <p><b>Шаг 1 (уточняющий вопрос):</b> «ИМЯ, понимаю Вас. Вы писали, что готовы уделять Х часов на обучение в неделю. Подскажите, вопрос времени — это единственное, что останавливает от принятия положительного решения?»</p>
+            <p><b>Шаг 2 (после ответа):</b> «Благодарю за ответ! В среднем на обучение уходит 1-2 часа в день. Программа построена так, что Вы сами выбираете время для изучения материалов — вживую важно быть только на круглых столах, а все занятия сохраняются в записи. Также у вас будет поддержка и помощь от куратора.» Завершение: «ИМЯ, подскажите, в таком формате Вам будет комфортно проходить программу и остались ли ещё какие-то вопросы и сомнения?»</p>
+          </div>
+        </details>
+        <details class="faq">
+          <summary>«Почему оплата не напрямую в вуз?»</summary>
+          <div class="faq-body"><p>«Оплата оформляется через ИП-партнёра (ИП Лапшин Владислав) через сервис ePay. После оплаты мы формируем список студентов и передаём его в РУДН для зачисления — при необходимости пришлём справку о зачислении.»</p></div>
+        </details>
+        <details class="faq">
+          <summary>«Это действительно диплом РУДН?»</summary>
+          <div class="faq-body"><p>«Да — по окончании выдаётся диплом государственного образца РУДН» (при наличии СПО/высшего образования, при только школьном — сертификат).</p></div>
+        </details>
+        <details class="faq">
+          <summary>«Что если не сдам экзамен?»</summary>
+          <div class="faq-body"><p>«Переносов итоговой аттестации на следующий поток нет, но даётся две возможности пересдачи в объявленные заранее сроки. Реально не сдать экзамен почти нереально — мы дотягиваем всех, кто действительно хочет сдать. Минимальная оценка — тройка.»</p></div>
+        </details>
+        <details class="faq">
+          <summary>«Я новичок, справлюсь ли?»</summary>
+          <div class="faq-body"><p>«Да, программа создавалась так, чтобы быть полезной и новичкам, и действующим тренерам. Всё обучение выстроено поэтапно: от базовой анатомии и физиологии до фитнес-программирования, реабилитации и маркетинга. У вас будут записи, кураторы и круглые столы — вы сможете проходить материал в комфортном темпе.»</p></div>
+        </details>
+        <details class="faq">
+          <summary>«Я уже тренер, мне будет полезно?»</summary>
+          <div class="faq-body"><p>«Да, даже для практикующих тренеров программа даёт уникальные блоки: остеопатические техники, реабилитация после травм, составление рационов питания, маркетинг и личный бренд. Эти знания делают тренера значительно более ценным и конкурентным на рынке.»</p></div>
+        </details>
+        <details class="faq">
+          <summary>«Интересно освоить для себя, а не быть тренером»</summary>
+          <div class="faq-body">
+            <p><b>Уточняющий вопрос:</b> «Понимаю — программа действительно даёт много полезного и для личного здоровья, не только для профессии. Расскажите, что для вас сейчас в приоритете — разобраться в своём теле и питании, или всё же не исключаете в будущем работу с клиентами?»</p>
+            <p><b>Ответ:</b> «Это абсолютно нормально — многие студенты приходят именно за этим: разобраться в себе, наладить своё здоровье, питание своей семьи. Диплом при этом всё равно остаётся с вами — если позже решите брать клиентов, эта возможность уже будет открыта, доучиваться заново не придётся.»</p>
+          </div>
+        </details>
+        <details class="faq">
+          <summary>«Почему так дорого?»</summary>
+          <div class="faq-body"><p>«Здесь несколько причин: это официальная программа РУДН с дипломом государственного образца, а не просто «курсы». В программе участвуют практикующие врачи и специалисты — кардиолог, эндокринолог, диетолог, травматолог-ортопед, реабилитолог. Это одна из самых объёмных программ подготовки фитнес-тренеров на рынке РФ.</p><p>Упор делается не только на упражнения, а на здоровье клиента и безопасность тренировок, плюс содействие в трудоустройстве. Стоимость соответствует уровню качества и статусу программы.»</p></div>
+        </details>
+        <details class="faq">
+          <summary>Налоговый вычет 13%</summary>
+          <div class="faq-body">
+            <p>Ответ: <b>недоступен</b>. Причина: у РУДН есть образовательная лицензия, но оплата идёт не напрямую в РУДН, а через ИП-партнёра — из-за этой схемы налоговый вычет невозможен.</p>
+            <p><b>Как объяснить клиенту:</b> «К сожалению, налоговый вычет сделать нельзя, потому что оплата идёт через нашего партнёра, а не напрямую в РУДН. Взамен курс даёт другие бонусы, которых нет напрямую у кафедры: приоритет в трудоустройстве, партнёрские бонусы, дополнительные материалы».</p>
+          </div>
+        </details>
+      </section>
+
+      <!-- 14 -->
+      <section class="panel" id="sec14">
+        <h2 class="sec-title">14. Частые вопросы (FAQ)</h2>
+
+        <h3 class="sub-title">14.1 Формат и сроки</h3>
+        <details class="faq">
+          <summary>Сколько времени в день нужно уделять обучению?</summary>
+          <div class="faq-body"><p>Ориентировочно 1-2 часа в день.</p></div>
+        </details>
+        <details class="faq">
+          <summary>Сколько длится один модуль?</summary>
+          <div class="faq-body"><p>Модули разные по длительности — от недели до месяца, часть можно посмотреть за 1.5-3 часа целиком. Если клиент спрашивает, лучше говорить диапазоном «от недели до месяца».</p></div>
+        </details>
+        <details class="faq">
+          <summary>Будут ли домашние работы и обратная связь по ним?</summary>
+          <div class="faq-body"><p>Нет, отдельной проверки домашних заданий с обратной связью в мини-группах нет. После каждого модуля есть только необязательные тесты. Единственная работа с развёрнутой обратной связью — итоговая выпускная работа.</p></div>
+        </details>
+        <details class="faq">
+          <summary>Круглый стол — какой формат, кто может задавать вопросы?</summary>
+          <div class="faq-body"><p>Участвует весь поток (не делят на группы). Вопросы собираются заранее через анкету и передаются лектору.</p></div>
+        </details>
+        <details class="faq">
+          <summary>На онлайн-платформе только лекции и тестирования?</summary>
+          <div class="faq-body"><p>Да — платформа РУДН содержит только лекции и тестирования, больше ничего.</p></div>
+        </details>
+
+        <h3 class="sub-title">14.2 Диплом, тарифы, деньги</h3>
+        <details class="faq">
+          <summary>Партнёрская программа — что это и работает ли она?</summary>
+          <div class="faq-body"><p>В прошлый раз что-то обсуждали, но так ничего и не запустили. Не предлагать клиенту партнёрскую программу как реальную возможность заработка.</p></div>
+        </details>
+        <details class="faq">
+          <summary>Скидка для тех, кто уже проходил обучение? Есть ли смысл идти ещё раз?</summary>
+          <div class="faq-body"><p>Нет скидки, нет смысла проходить повторно. Не предлагать повторное прохождение выпускникам прошлых потоков.</p></div>
+        </details>
+        <details class="faq">
+          <summary>Что нового с прошлого года?</summary>
+          <div class="faq-body"><p>Блок про составление рационов питания. Также в этом потоке исключён чек-ап, пока не решён вопрос со структурой тарифов маркетинга.</p></div>
+        </details>
+        <details class="faq">
+          <summary>Как долго сохраняется доступ к материалам после обучения?</summary>
+          <div class="faq-body"><p>Доступ ограничен по времени. Рабочая версия: 6 месяцев (тариф 1) / 1 год (тариф 2).</p></div>
+        </details>
+        <details class="faq">
+          <summary>Вкладка «Дополнительные курсы» на сайте — входит в стоимость?</summary>
+          <div class="faq-body"><p>Нет, отдельно. Это отдельный продукт для практикующих врачей, не пересекается с курсом «Фитнес-тренер».</p></div>
+        </details>
+
+        <h3 class="sub-title">14.3 Практика, трудоустройство, материалы</h3>
+        <details class="faq">
+          <summary>Офлайн-практика — для каких городов, как проходит?</summary>
+          <div class="faq-body"><p>Москва, Санкт-Петербург, Екатеринбург. Списки желающих собираются заранее, за месяц сообщают точную дату. День практики — в спортивной форме, адрес высылают заранее, продолжительность с 10:00 до 19:00.</p></div>
+        </details>
+        <details class="faq">
+          <summary>Как помогают с трудоустройством в X-Fit?</summary>
+          <div class="faq-body"><p>Дают контакт руководителя сети для отправки резюме напрямую — студенты в приоритете, но это не гарантия трудоустройства, собеседование студент проходит сам.</p></div>
+        </details>
+        <details class="faq">
+          <summary>После обучения дают готовые шаблоны/чек-листы для работы с клиентами?</summary>
+          <div class="faq-body"><p>Да — в лекциях Дмитрия Смирнова даются готовые примеры тренировочных программ, не всё разрабатывать с нуля самому.</p></div>
+        </details>
+        <details class="faq">
+          <summary>С какого момента можно брать первых клиентов?</summary>
+          <div class="faq-body"><p>Уже во время обучения. Можно также составлять клиентам план питания. Расшифровка анализов — это навык давать рекомендацию обратиться к профильному врачу, а не ставить диагноз/назначать лечение самостоятельно.</p></div>
+        </details>
+        <details class="faq">
+          <summary>Есть кейсы с прошлых потоков?</summary>
+          <div class="faq-body"><p>Да, канал с кейсами: <a href="https://t.me/+2ulWPaG5AJQ0YTQy" target="_blank" rel="noopener">t.me/+2ulWPaG5AJQ0YTQy</a></p></div>
+        </details>
+        <details class="faq">
+          <summary>Нужно ли будет что-то доплачивать дополнительно?</summary>
+          <div class="faq-body"><p>Нет, дополнительных расходов не предусмотрено.</p></div>
+        </details>
+
+        <h3 class="sub-title">14.4 Оплата и способы</h3>
+        <details class="faq">
+          <summary>Отличие оплаты сразу и в рассрочку — почему разные цены?</summary>
+          <div class="faq-body"><p>При рассрочке часть процента ложится на клиента (банковская рассрочка через Фреш) — отсюда разница в итоговой сумме.</p></div>
+        </details>
+        <details class="faq">
+          <summary>Можно оплатить зарубежной картой?</summary>
+          <div class="faq-body"><p>Да, через ГК — сервисы Клауд и Lava Top.</p></div>
+        </details>
+        <details class="faq">
+          <summary>Есть сайт?</summary>
+          <div class="faq-body"><p>Да — <a href="https://fitness.rudn.ru/" target="_blank" rel="noopener">fitness.rudn.ru</a></p></div>
+        </details>
+      </section>
+      <!-- 19 -->
+      <section class="panel" id="sec15">
+        <h2 class="sec-title">15. Тренажёр возражений</h2>
+        <p class="lede">Вставьте фразу клиента как есть, своими словами — инструмент подберёт тип возражения и готовый скрипт отработки. Понимает опечатки и разные формулировки, как и поиск наверху страницы.</p>
+
+        <div class="obj-tool">
+          <div class="obj-box">
+            <textarea id="objInput" placeholder="Например: у меня, наверное, не будет времени на учёбу... или: очень дорого для такой программы"></textarea>
+            <button class="qa-submit-btn" id="objBtn" style="align-self:stretch;">Подобрать отработку</button>
+          </div>
+          <div class="example-chips">
+            <button data-ex="времени не будет совсем">«времени не будет»</button>
+            <button data-ex="дорого для такой программы">«дорого»</button>
+            <button data-ex="хочу на следующий поток">«на следующий поток»</button>
+            <button data-ex="надо посоветоваться с мужем">«надо посоветоваться»</button>
+            <button data-ex="видел дешевле похожие курсы">«видел дешевле»</button>
+            <button data-ex="какая гарантия что найду работу">«гарантия трудоустройства?»</button>
+            <button data-ex="я уже проходил этот курс в прошлом году">«уже был в прошлом году»</button>
+            <button data-ex="интересно освоить для себя а не работать тренером">«хочу для себя, не для работы»</button>
+            <button data-ex="почему нет налогового вычета за обучение">«почему нет вычета»</button>
+          </div>
+          <div class="qa-loading" id="objLoading">
+            <div class="dots"><span></span><span></span><span></span></div>
+            <span>Подбираю отработку…</span>
+            <div class="scanbar"></div>
+          </div>
+          <div class="obj-result" id="objResult">
+            <span class="obj-cat" id="objCat"></span>
+            <div class="obj-row">
+              <div class="obj-label">Уточняющий вопрос</div>
+              <div class="obj-text" id="objClarify"></div>
+            </div>
+            <div class="obj-row">
+              <div class="obj-label">Скрипт отработки</div>
+              <div class="obj-text" id="objResponse"></div>
+            </div>
+          </div>
+          <div class="qa-suggestions" id="objSuggestions"></div>
+        </div>
+      </section>
+</main>
+
+
+
+<button id="backtotop" aria-label="Наверх" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+/* =========================================================
+   TAB NAVIGATION
+   ========================================================= */
+var CATS = [
+  { id:'product', label:'Продукт', sections:[
+    {id:'sec1', label:'Карточка'},
+    {id:'sec2', label:'Уникальность'},
+    {id:'sec3', label:'Модули'},
+    {id:'sec4', label:'Формат'},
+    {id:'sec5', label:'Документы'},
+    {id:'sec6', label:'Эксперт'},
+    {id:'sec7', label:'Команда'}
+  ]},
+  { id:'sales', label:'Продажи', sections:[
+    {id:'sec8', label:'Оплата'},
+    {id:'sec9', label:'Тарифы'},
+    {id:'sec10', label:'Tone of Voice'},
+    {id:'sec11', label:'Скрипт звонка'},
+    {id:'sec12', label:'Переписка'},
+    {id:'sec13', label:'Возражения'},
+    {id:'sec14', label:'FAQ'},
+    {id:'sec15', label:'Тренажёр возражений'}
+  ]}
+];
+
+var sectionToCat = {};
+CATS.forEach(function(cat){ cat.sections.forEach(function(s){ sectionToCat[s.id] = cat.id; }); });
+
+var catTabsEl = document.getElementById('catTabs');
+var subTabsEl = document.getElementById('subTabs');
+
+function renderCatTabs(activeCat){
+  catTabsEl.innerHTML = '';
+  CATS.forEach(function(cat){
+    var btn = document.createElement('button');
+    btn.textContent = cat.label;
+    if(cat.id === activeCat) btn.classList.add('active');
+    btn.addEventListener('click', function(){ showSection(cat.sections[0].id); });
+    catTabsEl.appendChild(btn);
+  });
+}
+
+function renderSubTabs(activeCat, activeSection){
+  subTabsEl.innerHTML = '';
+  var cat = CATS.find(function(c){ return c.id === activeCat; });
+  cat.sections.forEach(function(s){
+    var btn = document.createElement('button');
+    btn.textContent = s.label;
+    if(s.updated){
+      var dot = document.createElement('span');
+      dot.className = 'upd-dot';
+      btn.appendChild(dot);
+    }
+    if(s.id === activeSection) btn.classList.add('active');
+    btn.addEventListener('click', function(){ showSection(s.id); });
+    subTabsEl.appendChild(btn);
+  });
+}
+
+function showSection(id){
+  var cat = sectionToCat[id];
+  if(!cat) return;
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  var panel = document.getElementById(id);
+  if(panel) panel.classList.add('active');
+  renderCatTabs(cat);
+  renderSubTabs(cat, id);
+  window.scrollTo({top: document.querySelector('.tabs-wrap').offsetTop - 10, behavior:'smooth'});
+  history.replaceState(null, '', '#' + id);
+}
+
+// dashboard cards jump
+document.querySelectorAll('.stat-card').forEach(function(card){
+  card.addEventListener('click', function(){ showSection(card.getAttribute('data-jump')); });
+});
+
+// init
+(function(){
+  var initial = (location.hash && document.getElementById(location.hash.slice(1))) ? location.hash.slice(1) : 'sec1';
+  showSection(initial);
+})();
+
+window.addEventListener('scroll', function(){
+  var btn = document.getElementById('backtotop');
+  if(window.scrollY > 500) btn.classList.add('show'); else btn.classList.remove('show');
+});
+
+// checklist interactivity
+document.querySelectorAll('.checklist li').forEach(function(li){
+  var cb = li.querySelector('input[type=checkbox]');
+  cb.addEventListener('change', function(){ li.classList.toggle('done', cb.checked); });
+});
+
+/* =========================================================
+   SMART Q&A — fuzzy matching, answers only from curated data
+   ========================================================= */
+function levenshtein(a, b){
+  var m = a.length, n = b.length;
+  if(m === 0) return n;
+  if(n === 0) return m;
+  var prev = new Array(n+1);
+  var curr = new Array(n+1);
+  for(var j=0;j<=n;j++) prev[j]=j;
+  for(var i=1;i<=m;i++){
+    curr[0]=i;
+    for(var j=1;j<=n;j++){
+      var cost = a[i-1]===b[j-1] ? 0 : 1;
+      curr[j] = Math.min(prev[j]+1, curr[j-1]+1, prev[j-1]+cost);
+    }
+    var tmp = prev; prev = curr; curr = tmp;
+  }
+  return prev[n];
+}
+
+var STOPWORDS = ['и','а','в','на','с','по','для','что','как','это','ли','я','мы','вы','ты','он','она','они',
+  'да','нет','мне','мой','моя','моё','будет','ли','то','же','из','у','о','об','к','до','при','если','когда',
+  'можно','нужно','надо','есть','быть','это','такое','такой','такая','такие','кто','какой','какая','какое',
+  'какие','кому','кого','про','об','ещё','еще','вообще','просто','ну','а','да','же','либо','или','там','тут',
+  'здесь','сейчас','вот','этот','эта','эти','него','нее','её','их','его','всё','все','был','была','были'];
+
+function normalizeTokens(str){
+  return str.toLowerCase()
+    .replace(/[«»"'.,!?;:()\-–—]/g, ' ')
+    .split(/\s+/)
+    .filter(function(w){ return w.length>1 && STOPWORDS.indexOf(w)===-1; });
+}
+
+function wordSim(a, b){
+  if(a === b) return 1;
+  var maxLen = Math.max(a.length, b.length);
+  var minLen = Math.min(a.length, b.length);
+  if(minLen < 3) return 0;
+  var d = levenshtein(a, b);
+  var allowed = maxLen<=5 ? 1 : (maxLen<=8 ? 2 : 3);
+  if(d <= allowed) return 1 - d/maxLen;
+  var prefixLen = Math.min(4, minLen);
+  if(a.slice(0,prefixLen) === b.slice(0,prefixLen)) return 0.6;
+  return 0;
+}
+
+function triggerScore(queryTokens, triggerTokens){
+  if(triggerTokens.length === 0) return 0;
+  var total = 0;
+  triggerTokens.forEach(function(t){
+    var best = 0;
+    queryTokens.forEach(function(q){ best = Math.max(best, wordSim(q,t)); });
+    total += best;
+  });
+  return total / triggerTokens.length;
+}
+
+// how much of what the USER TYPED is covered by ANY trigger word of this entry —
+// this is what makes short queries like "кто такой дзидзария" work even though
+// the matching trigger phrase is longer or worded differently
+function queryCoverageScore(queryTokens, allEntryTokens){
+  if(queryTokens.length === 0) return 0;
+  var covered = 0;
+  queryTokens.forEach(function(q){
+    var best = 0;
+    allEntryTokens.forEach(function(t){ best = Math.max(best, wordSim(q,t)); });
+    if(best >= 0.55) covered += best;
+  });
+  return covered / queryTokens.length;
+}
+
+function entryScore(queryTokens, entry){
+  if(queryTokens.length === 0) return 0;
+  var triggerBest = 0;
+  var allTokens = [];
+  entry.triggers.forEach(function(trig){
+    var tTokens = normalizeTokens(trig);
+    allTokens = allTokens.concat(tTokens);
+    var s = triggerScore(queryTokens, tTokens);
+    if(s > triggerBest) triggerBest = s;
+  });
+  var coverage = queryCoverageScore(queryTokens, allTokens);
+  // a short, precise query (e.g. "кто такой дзидзария") should win on coverage;
+  // a long, descriptive query should win on trigger-recall — take whichever fits better
+  return Math.max(triggerBest, coverage);
+}
+
+var QA_DATA = [
+  { id:'diploma', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['какой диплом дают','что получу по окончании курса','диплом гос образца','государственный диплом или нет','какой документ выдают после обучения','сертификат или диплом','диплом','документ об окончании'],
+    answer:'Диплом государственного образца РУДН — при наличии СПО (колледж/техникум) или высшего образования. При только школьном образовании (аттестат) — сертификат.\n\nЕсли студент ещё учится (не завершил своё образование), можно предоставить справку об обучении и получить сертификат, а после завершения своего образования обменять его на диплом — но только если справка была предоставлена во время прохождения курса «Фитнес-тренер» (личные дела в РУДН хранятся ограниченный срок).\n\nДиплом и сертификат по уровню документа примерно равнозначны, разница скорее в восприятии работодателя — не говорить, что сертификат «хуже».',
+    jumpTo:'sec5' },
+
+  { id:'tax_deduction', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['налоговый вычет','вычет 13 процентов','можно ли вернуть 13%','вычет за обучение','вычет','есть ли вычет','почему нет вычета','налоговый вычет за обучение'],
+    answer:'Нет, налоговый вычет 13% недоступен. Причина: у РУДН есть образовательная лицензия, но оплата идёт не напрямую в РУДН, а через ИП-партнёра — из-за этой схемы вычет невозможен.\n\nВзамен курс даёт бонусы, которых нет напрямую у кафедры: приоритет в трудоустройстве, партнёрские бонусы, подарки на старте потока.',
+    jumpTo:'sec8' },
+
+  { id:'module1', tag:'warn', tagLabel:'Требует уточнения',
+    triggers:['что в первом модуле','что входит в вводный модуль','с чего начинается курс','первый урок программы','что изучают в начале','вводный модуль','первый модуль'],
+    answer:'Официальный порядок модулей начинается с «Вводного модуля», за ним идёт «Анатомия». Подробного содержания именно вводного модуля в материалах нет.',
+    jumpTo:'sec3' },
+
+  { id:'marketing', tag:'warn', tagLabel:'Пока не решено самой командой',
+    triggers:['будет ли маркетинг','обучат ли маркетингу','есть ли блок про маркетинг','учат ли продвижению в соцсетях','личный бренд обучение','продажи в переписке блок','маркетинг','личный бренд','смм','продвижение'],
+    answer:'Да, маркетингу обучают: стратегия роста, продажи в переписке, упаковка Instagram/Telegram, Reels, работа с резюме и собеседованием.\n\nНо неизвестно, будет ли это отдельным тарифом 2 (как раньше) или войдёт в единый тариф — сама команда ещё не приняла это решение на момент подготовки материала. Не давать точный ответ клиенту про структуру тарифов до подтверждения.',
+    jumpTo:'sec3' },
+
+  { id:'two_together', tag:'info', tagLabel:'Нет данных — уточнить',
+    triggers:['можно ли учиться вдвоем','можно ли пройти курс парой','обучение вместе с другом','два человека одна программа','вдвоем','участвовать вдвоем','вместе с подругой учиться','парой записаться'],
+    answer:'В имеющихся материалах нет информации о возможности совместного/парного обучения или скидках за групповую запись. Нужно уточнить у команды перед тем, как отвечать клиенту.',
+    jumpTo:'sec9' },
+
+  { id:'duration', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['сколько длится курс','сколько по времени учиться','продолжительность программы','сколько месяцев обучение','сколько часов курс','сколько времени в день','длительность','сколько длится','продолжительность'],
+    answer:'560 академических часов, 17 обязательных блоков. В среднем на обучение уходит 1-2 часа в день. Длительность одного модуля разная — от недели до месяца.',
+    jumpTo:'sec1' },
+
+  { id:'higher_education', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['нужно ли высшее образование','можно поступить без диплома о вышке','подойдет ли среднее специальное образование','образование для поступления','высшее образование','образование нужно'],
+    answer:'Высшее образование не обязательно для поступления на курс — специального образования вообще не требуется. Но тип итогового документа зависит от уровня образования: школьное → сертификат, СПО/высшее → диплом государственного образца.',
+    jumpTo:'sec5' },
+
+  { id:'exam_fail', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['что если не сдам экзамен','какой документ если провалил экзамен','не сдал итоговую аттестацию что делать','можно ли пересдать экзамен','экзамен','пересдача','аттестация','итоговый экзамен'],
+    answer:'Переносов итоговой аттестации на следующий поток нет — но даются две возможности пересдачи в объявленные заранее сроки. Минимальная проходная оценка — «тройка». Реально не сдать экзамен почти нереально — команда «дотягивает» всех, кто действительно старается.',
+    jumpTo:'sec4' },
+
+  { id:'format', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['как проходит обучение','формат занятий','онлайн или очно','вебинары в записи или вживую','как устроена платформа','формат','платформа'],
+    answer:'Обучение полностью дистанционное. После оплаты — доступ к каналу и платформе. Необязательные блоки открыты сразу, обязательные — открываются по порядку. После каждого блока — необязательный тест и круглый стол с преподавателем. Абсолютно все живые занятия сохраняются в записи.',
+    jumpTo:'sec4' },
+
+  { id:'price', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['сколько стоит курс','цена тарифа','стоимость обучения','сколько платить за программу','цена','стоимость','сколько стоит'],
+    answer:'Тариф 1 — 220 000 ₽ (рассрочка 19 588 ₽×12 мес). Тариф 2 — 250 000 ₽ (рассрочка 22 000 ₽×12 мес).',
+    jumpTo:'sec9' },
+
+  { id:'installment', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['есть ли рассрочка','можно в рассрочку оплатить','беспроцентная рассрочка','рассрочка на несколько месяцев','рассрочка'],
+    answer:'Да. Банковская рассрочка через партнёра «Фреш» до 12 месяцев (проценты на клиенте). Также есть внутренняя рассрочка компании (2, 4 или 8 месяцев по убыванию приоритета) — она не беспроцентная, чем короче срок, тем выгоднее компании.',
+    jumpTo:'sec8' },
+
+  { id:'checkup', tag:'warn', tagLabel:'Исключён из потока!',
+    triggers:['что входит в чек-ап','какие анализы делают','состав обследования биочек','чекап для мужчин и женщин','есть ли чек ап','биочек включен','чек-ап','чекап','биочек','анализы'],
+    answer:'В этом потоке чек-ап BIOCheck НЕ входит в программу — партнёрство прекращено на уровне бизнеса. За счёт исключения чек-апа стоимость обучения снижена.\n\nНе предлагать чек-ап клиентам и не использовать как аргумент продажи. Если старый клиент вспоминает чек-ап как преимущество — объяснять снижением цены.',
+    jumpTo:'sec1' },
+
+  { id:'expert_bio', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['кто ведет курс','кто эксперт программы','биография дзидзария','кто автор курса','квалификация преподавателя','дзидзария','александр дзидзария','александр гудисович','гудисович','кто такой дзидзария','кто такой александр','александр','кто такой александр гудисович','кто ведет программу','расскажи про дзидзария'],
+    answer:'Александр Гудисович Дзидзария — доктор медицинских наук, заведующий кафедрой спортивной медицины РУДН, заведующий отделением онкоурологии и онкогинекологии, хирург-онколог, андролог, уролог. 15 лет медицинского стажа, помог более 5000 спортсменам. Также спортсмен: 6 сезонов соревнований по бодибилдингу, наставник чемпионов России и Европы, 6 лет в бразильском джиу-джитсу (пурпурный пояс). Основатель проекта «Фитнес Как Наука», аудитория относится к нему с большим уважением.',
+    jumpTo:'sec6' },
+
+  { id:'teachers', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['кто преподает на курсе','список преподавателей','какие врачи ведут курс','команда экспертов программы','преподаватели','кто преподает','учителя','наставники','глеб фостенко','фостенко','глеб парфенов','парфенов','кто такой фостенко','кто такой парфенов','дмитрий смирнов','александр сулацкий'],
+    answer:'Команда из 19 преподавателей: помимо Александра Дзидзария — кардиолог, эндокринолог, врач-терапевт, врач-диетолог, травматолог-ортопед, спортивный физиолог, реабилитолог, преподаватель анатомии, инструктор по методике тренировок (Александр Сулацкий), Дмитрий Смирнов (даёт готовые примеры тренировочных программ), несколько практикующих фитнес-тренеров и маркетологи (Глеб Фостенко и Глеб Парфенов).',
+    jumpTo:'sec7' },
+
+  { id:'employment', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['помогают ли с трудоустройством','можно ли найти работу после курса','трудоустройство в фитнес клуб','работа тренером после диплома','как попасть в x-fit','трудоустройство','работа','x-fit','иксфит'],
+    answer:'Да — даём прямой контакт руководителя сети X-Fit для отправки резюме, студенты в приоритете. Это НЕ гарантия трудоустройства — собеседование студент проходит сам. Справку об обучении в РУДН можно получить по запросу ещё до получения диплома на руки.',
+    jumpTo:'sec2' },
+
+  { id:'beginner', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['подходит ли для новичков','нужен ли опыт в фитнесе','с нуля можно начать','без опыта в спорте можно ли учиться','новичок','с нуля','без опыта'],
+    answer:'Да, программа рассчитана и на новичков, и на действующих тренеров — материал построен поэтапно, от базовой анатомии и физиологии до фитнес-программирования и маркетинга. Специального образования для поступления не требуется.',
+    jumpTo:'sec2' },
+
+  { id:'card_payment', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['можно оплатить картой','оплата картой не рф','способы оплаты картой','оплата картой','карта'],
+    answer:'Да, оплата картой доступна. Зарубежные карты — через Клауд или Lava Top. Важно: в списке способов может отображаться рассрочка от Тинькофф — клиенту нужно явно выбрать оплату картой, а не этот вариант.',
+    jumpTo:'sec8' },
+
+  { id:'practice_city', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['где проходит очная практика','в каком городе практикум','офлайн занятия в каком городе','практика','офлайн практика','город практики'],
+    answer:'Города практики: Москва, Санкт-Петербург, Екатеринбург. Один полный день, с 10:00 до 19:00. Проезд и проживание не включены в стоимость, за пропуск практики компенсации нет. Практика не записывается.',
+    jumpTo:'sec4' },
+
+  { id:'webinar', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['будет ли вебинар перед покупкой','эфир с экспертом когда','презентация курса онлайн','вебинар','эфир'],
+    answer:'Да, планируется минимум один открытый эфир с Александром Гудисовичем, плюс эфир с маркетологом или действующим тренером. Точные даты пока не определены.',
+    jumpTo:'sec9' },
+
+  { id:'tariffs_diff', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['сколько тарифов','в чем разница между тарифами','что входит в первый и второй тариф','тариф','тарифы','разница тарифов'],
+    answer:'Два тарифа. Тариф 1 — научно-теоретическая база, тренировочная методика, здоровье и питание, доступ 6 месяцев, 220 000 ₽. Тариф 2 — то же плюс углублённый маркетинг и личный бренд, доступ 1 год, 250 000 ₽. Неизвестно, останется ли маркетинг отдельным тарифом или объединят в один.',
+    jumpTo:'sec9' },
+
+  { id:'bilingual_diploma', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['двуязычный диплом','диплом на английском языке','диплом для иностранного гражданина','двуязычный','диплом на английском'],
+    answer:'Двуязычный диплом (рус/англ) — только для лиц с иностранным или двойным гражданством. Нужен нотариально заверенный перевод паспорта и диплома об образовании на русский и английский — данные вносятся строго по присланным переводам.',
+    jumpTo:'sec5' },
+
+  { id:'contract', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['можно посмотреть договор','есть ли договор на обучение','договор с рудн покажите','договор','оферта'],
+    answer:'Да, публичная оферта в открытом доступе на сайте — если студент просит, ничего не скрываем, пересылаем. Исполнитель — ИП Лапшин Владислав Владимирович, РУДН выступает субподрядчиком.',
+    jumpTo:'sec8' },
+
+  { id:'homework', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['будут ли домашние задания','есть ли практические задания по ходу курса','нужно ли делать домашку','домашка','домашние задания','проверяют ли дз'],
+    answer:'Нет, отдельной проверки домашних заданий с обратной связью нет. После каждого блока — только необязательные тесты (не проверяются кураторами). Единственная работа с развёрнутой обратной связью — итоговая выпускная работа.',
+    jumpTo:'sec14' },
+
+  { id:'refund', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['могу ли я вернуть деньги','что если я передумаю и захочу отказаться','возврат оплаты за курс','как отказаться от обучения','передумал хочу вернуть деньги за курс','отказаться и вернуть деньги','возврат денег','возврат'],
+    answer:'Да, возврат возможен через куратора (пишете заявление), но не в полном объёме — вычитается стоимость уже полученного материала и комиссии платёжных систем. Полного возврата после начала обучения не будет.',
+    jumpTo:'sec8' },
+
+  { id:'extra_courses', tag:'info', tagLabel:'Отдельный продукт',
+    triggers:['есть ли дополнительные курсы','что такое доп курсы на сайте','другие программы кафедры кроме фитнес тренера','дополнительные курсы','доп курсы'],
+    answer:'Да, «Дополнительные курсы» на сайте — но это отдельный продукт для практикующих врачей (Лечебное дело, Педиатрия), покупается отдельно, не входит в стоимость. Не пересекается с аудиторией «Фитнес-тренер».',
+    jumpTo:'sec8' },
+
+  { id:'whats_new', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['чем отличается программа от прошлого года','что изменилось в этом году в курсе','отличия нового потока от старого','что нового в программе 2026','что нового','отличия'],
+    answer:'Прямо подтверждено командой: главное новое — блок по составлению рационов питания. Также в этом потоке исключён чек-ап BIOCheck, и пока не решено, останется ли маркетинг отдельным тарифом.',
+    jumpTo:'sec3' },
+
+  { id:'repeat_discount', tag:'ok', tagLabel:'Подтверждено — нет скидки',
+    triggers:['скидка если был на прошлом потоке','есть ли скидка повторным студентам','условия для тех кто уже учился в прошлом году','льготная цена для старых студентов','скидка если проходил в прошлом году','скидка повторным','скидка'],
+    answer:'Прямо подтверждено командой: скидки для тех, кто уже проходил обучение, нет.',
+    jumpTo:'sec9' },
+
+  { id:'worth_repeating', tag:'ok', tagLabel:'Подтверждено — команда говорит «нет смысла»',
+    triggers:['есть ли смысл идти если был уже в прошлом году','стоит ли повторно проходить курс','зачем снова учиться если уже проходил в прошлом потоке','повторное прохождение программы имеет смысл','есть ли смысл идти повторно','смысл повторно проходить'],
+    answer:'Прямой ответ команды: «нет скидки, нет смысла проходить». Не предлагать повторное прохождение выпускникам прошлых потоков — разве что появится что-то принципиально новое.',
+    jumpTo:'sec9' },
+
+  { id:'partner_program', tag:'ok', tagLabel:'Подтверждено — не работает',
+    triggers:['партнерская программа что это','можно заработать на партнерке','как работает партнерская программа курса','работает партнерка','партнерка'],
+    answer:'Прямо подтверждено: партнёрскую программу и раньше обсуждали, но так толком и не запустили. Не обещать клиенту заработок через неё.',
+    jumpTo:'sec9' },
+
+  { id:'crypto', tag:'info', tagLabel:'Нет данных — уточнить',
+    triggers:['можно оплатить криптовалютой','оплата в биткоинах','крипта как способ оплаты'],
+    answer:'Вопрос задан команде, но ответа пока нет. Не обещать клиенту оплату криптовалютой до подтверждения.',
+    jumpTo:'sec9' },
+
+  { id:'first_clients', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['когда можно брать первых клиентов','с какого момента начинать тренировать','можно ли работать во время учебы'],
+    answer:'Да, 100% подтверждено — первых клиентов можно брать уже во время обучения, не дожидаясь диплома. Можно составлять план питания. Расшифровка анализов — это навык давать рекомендацию обратиться к профильному врачу, а не ставить диагноз самостоятельно.',
+    jumpTo:'sec4' },
+
+  { id:'cases', tag:'ok', tagLabel:'Подтверждено',
+    triggers:['есть кейсы с прошлых потоков','можно посмотреть отзывы студентов','истории успеха выпускников'],
+    answer:'Да, есть канал с кейсами прошлых потоков (t.me/+2ulWPaG5AJQ0YTQy) — истории студентов, которые пошли работать тренерами, похудели сами, перевели семью на правильное питание.',
+    jumpTo:'sec14' }
+];
+function tagClass(tag){ return 'tag ' + tag; }
+
+/* ---- staggered word-reveal renderer with real paragraph support (fixes space collapsing) ---- */
+function revealWords(container, text, onDone){
+  container.innerHTML = '';
+  var paragraphs = text.split(/\n\s*\n/);
+  var globalIndex = 0;
+  paragraphs.forEach(function(para){
+    var p = document.createElement('p');
+    p.className = 'reveal-para';
+    var words = para.trim().split(/\s+/).filter(function(w){ return w.length > 0; });
+    words.forEach(function(w, i){
+      var span = document.createElement('span');
+      span.className = 'word-reveal';
+      span.style.animationDelay = (globalIndex * 22) + 'ms';
+      span.textContent = w;
+      p.appendChild(span);
+      if(i < words.length - 1){ p.appendChild(document.createTextNode(' ')); }
+      globalIndex++;
+    });
+    container.appendChild(p);
+  });
+  if(onDone) setTimeout(onDone, globalIndex*22 + 400);
+}
+
+/* ---- generic: run fuzzy search with a "scanning" loading phase, then reveal ---- */
+function fuzzySearchWithLoading(opts){
+  // opts: {query, dataArray, matchThreshold, candidateThreshold, loadingEl, btnEl, onMatch(entry,q), onNoMatch(q,candidates)}
+  var q = opts.query.trim();
+  if(q.length < 2) return;
+  opts.btnEl.disabled = true;
+  opts.loadingEl.classList.add('show');
+  if(opts.answerEl) opts.answerEl.classList.remove('show');
+  if(opts.suggestionsEl) opts.suggestionsEl.classList.remove('show');
+
+  setTimeout(function(){
+    var qTokens = normalizeTokens(q);
+    var scored = opts.dataArray.map(function(entry){
+      return { entry: entry, score: entryScore(qTokens, entry) };
+    });
+    scored.sort(function(a,b){ return b.score - a.score; });
+
+    opts.loadingEl.classList.remove('show');
+    opts.btnEl.disabled = false;
+
+    if(qTokens.length && scored[0].score >= opts.matchThreshold){
+      opts.onMatch(scored[0].entry, q);
+    } else {
+      var candidates = scored.filter(function(s){ return s.score >= opts.candidateThreshold; }).slice(0,3);
+      opts.onNoMatch(q, candidates);
+    }
+  }, 550 + Math.random()*250);
+}
+
+function addCopyButton(container, getText){
+  var btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = 'Копировать';
+  btn.type = 'button';
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    var text = getText();
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).catch(function(){});
+    }
+    btn.textContent = 'Скопировано ✓';
+    btn.classList.add('copied');
+    setTimeout(function(){ btn.textContent = 'Копировать'; btn.classList.remove('copied'); }, 1500);
+  });
+  container.appendChild(btn);
+}
+
+// add copy buttons to every static script-line already in the document
+document.querySelectorAll('.script-line').forEach(function(el){
+  addCopyButton(el, function(){ return el.innerText.trim(); });
+});
+
+/* ================= HERO Q&A ================= */
+var qaInput = document.getElementById('qaInput');
+var qaBtn = document.getElementById('qaBtn');
+var qaLoadingEl = document.getElementById('qaLoading');
+var qaAnswerEl = document.getElementById('qaAnswer');
+var qaQEl = document.getElementById('qaQ');
+var qaTagEl = document.getElementById('qaTag');
+var qaBodyEl = document.getElementById('qaBody');
+var qaJumpEl = document.getElementById('qaJump');
+var qaSuggestionsEl = document.getElementById('qaSuggestions');
+
+function renderAnswer(entry, queryText){
+  qaAnswerEl.classList.add('show');
+  qaSuggestionsEl.classList.remove('show');
+  qaQEl.textContent = 'Вопрос: «' + queryText + '»';
+  qaTagEl.className = tagClass(entry.tag);
+  qaTagEl.textContent = entry.tagLabel;
+  revealWords(qaBodyEl, entry.answer);
+  qaJumpEl.textContent = 'Подробнее в разделе →';
+  qaJumpEl.onclick = function(e){ e.preventDefault(); showSection(entry.jumpTo); };
+}
+
+function renderNoMatch(queryText, candidates){
+  qaAnswerEl.classList.add('show');
+  qaQEl.textContent = 'Вопрос: «' + queryText + '»';
+  qaTagEl.className = tagClass('info');
+  qaTagEl.textContent = 'Точного ответа нет в базе';
+  revealWords(qaBodyEl, 'В имеющихся материалах не нашлось уверенного ответа на этот вопрос. Лучше уточнить у команды или на обучении, чем отвечать клиенту наугад.');
+  qaJumpEl.textContent = '';
+  qaJumpEl.onclick = null;
+
+  if(candidates.length){
+    qaSuggestionsEl.innerHTML = 'Возможно, вы имели в виду:';
+    candidates.forEach(function(c){
+      var btn = document.createElement('button');
+      btn.textContent = c.entry.triggers[0];
+      btn.addEventListener('click', function(){
+        qaInput.value = c.entry.triggers[0];
+        runQuery(c.entry.triggers[0]);
+      });
+      qaSuggestionsEl.appendChild(btn);
+    });
+    qaSuggestionsEl.classList.add('show');
+  } else {
+    qaSuggestionsEl.classList.remove('show');
+  }
+}
+
+function runQuery(text){
+  fuzzySearchWithLoading({
+    query: text,
+    dataArray: QA_DATA,
+    matchThreshold: 0.55,
+    candidateThreshold: 0.28,
+    loadingEl: qaLoadingEl,
+    btnEl: qaBtn,
+    answerEl: qaAnswerEl,
+    suggestionsEl: qaSuggestionsEl,
+    onMatch: renderAnswer,
+    onNoMatch: renderNoMatch
+  });
+}
+
+qaBtn.addEventListener('click', function(){ runQuery(qaInput.value); });
+qaInput.addEventListener('keydown', function(e){
+  if(e.key === 'Enter'){ e.preventDefault(); runQuery(qaInput.value); }
+});
+
+/* ================= OBJECTION TRAINER ================= */
+var OBJECTION_DATA = [
+  { id:'no_time', category:'Время',
+    triggers:['времени не будет совсем','не успею совмещать с работой','слишком занят чтобы учиться','нет свободного времени на курс','боюсь не потяну по времени','время','времени нет','занят'],
+    clarify:'«ИМЯ, понимаю Вас. Вы писали, что готовы уделять Х часов на обучение в неделю. Подскажите, вопрос времени — это единственное, что останавливает от принятия положительного решения?»',
+    response:'«Благодарю за ответ! Программа действительно достаточно насыщенная, и именно поэтому обучение построено так, чтобы Вы сами выбирали время для изучения материалов — живьём важно быть только на круглых столах. Всё остальное доступно в записи в удобном темпе, плюс у вас будет поддержка куратора.»' },
+
+  { id:'expensive', category:'Цена',
+    triggers:['дорого для такой программы','цена слишком высокая','почему так дорого стоит','не готов платить столько','дорого','цена высокая'],
+    clarify:'«Понимаю, что сумма значимая. Подскажите, смущает именно стоимость, или скорее вопрос — за счёт чего складывается такая цена?»',
+    response:'«Это официальная программа РУДН с дипломом государственного образца, а не просто «курсы»: в программе участвуют практикующие врачи — кардиолог, эндокринолог, диетолог, травматолог-ортопед, реабилитолог. Это одна из самых объёмных программ подготовки фитнес-тренеров на рынке РФ.\n\nУпор делается не только на упражнения, а на здоровье клиента и безопасность тренировок, плюс содействие в трудоустройстве. Стоимость соответствует уровню и статусу программы.»' },
+
+  { id:'next_stream', category:'Перенос решения',
+    triggers:['хочу на следующий поток','подожду следующего набора','пока не готов записаться','запишусь позже в другой раз','отложу решение на потом','следующий поток','позже'],
+    clarify:'«Хорошо, что рассматриваете обучение всерьёз. Подскажите, что должно измениться к следующему потоку, чтобы решение было проще принять именно тогда — время, бюджет, или что-то ещё?»',
+    response:'«Понимаю ваше желание не спешить. Важный момент: сейчас действует период раннего бронирования с лучшими условиями по стоимости, и следующий поток стартует не сразу, а через несколько месяцев — то есть пауза в обучении получится длиннее, чем кажется.\n\nЕсли хотите, можем зафиксировать за вами место сейчас на текущих условиях, а к организационным вопросам вернёмся позже.»' },
+
+  { id:'need_to_ask', category:'Нужно посоветоваться',
+    triggers:['надо посоветоваться с мужем','нужно спросить у жены','обсужу с семьей и отвечу','посоветуюсь и напишу','посоветоваться','подумать'],
+    clarify:'«Это абсолютно нормально — конечно, посоветуйтесь. Подскажите, какие вопросы, скорее всего, возникнут у вас дома, чтобы я мог сразу на них ответить?»',
+    response:'«Если удобно, можем пригласить вашего близкого человека на консультацию или следующий эфир с Александром Гудисовичем — так у него будет полная картина из первых рук, а не в пересказе. Не тороплю с решением, просто хочу, чтобы у вас обоих было достаточно информации.»' },
+
+  { id:'seen_cheaper', category:'Конкуренты',
+    triggers:['видел дешевле похожие курсы','есть курсы дешевле такие же','зачем платить больше если есть аналоги','конкуренты предлагают дешевле','дешевле','конкуренты'],
+    clarify:'«Подскажите, что за программу вы сравниваете — интересно, что конкретно в ней предлагается, чтобы честно сопоставить.»',
+    response:'«Многие курсы дают только упражнения. Здесь же — официальная программа РУДН с командой практикующих врачей, диплом государственного образца, остеопатические техники и реабилитация после травм.\n\nПлюс содействие в трудоустройстве в X-Fit. Это не просто набор видео с упражнениями, а полноценная медицинская и тренерская подготовка.»' },
+
+  { id:'guarantee_job', category:'Гарантии результата',
+    triggers:['какая гарантия что найду работу','гарантируете трудоустройство','обещаете доход после курса','точно устроюсь тренером после обучения','гарантия','гарантии'],
+    clarify:'«Хороший вопрос — важно понимать реалистичные ожидания. Смотрите, а что для вас лично будет считаться успехом — трудоустройство в клуб, работа на себя, или пока личное развитие?»',
+    response:'«Прямых гарантий трудоустройства или дохода мы не даём — это добросовестно нужно проговорить сразу.\n\nНо есть содействие в трудоустройстве в сеть X-Fit, диплом даёт право вести профессиональную деятельность по специальности, а средняя зарплата фитнес-тренера в Москве, по данным Росстата, — около 122 000 ₽. Дальнейший результат зависит от вашей активности так же, как в любой профессии.»' },
+
+  { id:'no_trust_online', category:'Доверие к формату',
+    triggers:['не доверяю онлайн формату','хочу учиться очно а не через интернет','сомневаюсь что онлайн курс это серьезно','не доверяю','онлайн формат'],
+    clarify:'«Понимаю сомнения — многие переживают, что онлайн-формат менее серьёзный. Скажите, что именно смущает: качество материала или отсутствие живого контакта?»',
+    response:'«Программа не полностью «в записи»: есть живые вебинары по ключевым модулям и круглые столы с преподавателями, где можно задать любой вопрос.\n\nПлюс личная встреча с Александром Гудисовичем на выпускном. Формат отдельных практических активностей может уточняться по ходу потока, но живое общение с преподавателями заложено в программу с самого начала.»' },
+
+  { id:'no_diploma_edu', category:'Документы / образование',
+    triggers:['у меня нет высшего образования','какой документ если нет диплома о вышке','подойдет ли без образования вообще','нет образования','без диплома'],
+    clarify:'«Подскажите, у вас есть среднее специальное образование (колледж/техникум), или совсем без диплома о профильном/непрофильном образовании?»',
+    response:'«Высшее образование не обязательно для поступления на курс. Правило простое: школьное образование (только аттестат) — сертификат об обучении. Среднее специальное или высшее — диплом государственного образца. Это разный формальный статус документа, но не разный уровень подготовки.»' },
+
+  { id:'not_now_money', category:'Финансы',
+    triggers:['сейчас нет денег на оплату','сложно найти сумму сразу','финансово не потяну полную сумму','нет денег','финансы'],
+    clarify:'«Понимаю. Подскажите, если разбить сумму на части — рассрочка была бы для вас комфортным вариантом?»',
+    response:'«Да, можно оформить рассрочку: банковская рассрочка до 12 месяцев через нашего партнёра, либо внутренняя рассрочка на 2 части (часть сейчас, часть через месяц). Отправлю ссылку — там же можно выбрать удобный вариант и заполнить анкету, после чего с вами свяжется менеджер и поможет оформить.»' },
+
+  { id:'beginner_worry', category:'Уверенность в себе',
+    triggers:['я новичок вдруг не справлюсь','боюсь что будет слишком сложно','нет опыта в фитнесе совсем','новичок','боюсь не справлюсь'],
+    clarify:'«Это частое переживание, и оно понятно. Скажите, вас больше беспокоит объём материала или именно медицинская/анатомическая часть?»',
+    response:'«Программа создавалась так, чтобы быть полезной и понятной новичкам: материал даётся поэтапно, от базовой анатомии и физиологии до практики. У вас будут записи, куратор и круглые столы с преподавателями — можно проходить материал в комфортном темпе и всегда спросить, если что-то непонятно.»' },
+
+  { id:'already_trainer', category:'Опытный специалист',
+    triggers:['я уже действующий тренер зачем мне это','у меня есть опыт нужен ли мне курс'],
+    clarify:'«Отлично, что уже практикуете! Расскажите, в каком направлении сейчас работаете — интересно понять, какие блоки будут для вас особенно ценны.»',
+    response:'«Даже для практикующих тренеров программа даёт то, чего обычно нет на рынке: остеопатические техники, реабилитацию после травм, составление рационов питания, а также блок маркетинга и личного бренда. Это делает вас более ценным специалистом и расширяет то, что вы можете предложить клиентам.»' },
+
+  { id:'personal_use', category:'Для себя, не для работы',
+    triggers:['интересно освоить для себя а не быть тренером','хочу для личного развития не для работы','не планирую работать тренером просто интересно'],
+    clarify:'«Понимаю — программа действительно даёт много полезного и для личного здоровья, не только для профессии. Расскажите, что для вас сейчас в приоритете — разобраться в своём теле и питании, или всё же не исключаете в будущем работу с клиентами?»',
+    response:'«Это абсолютно нормально — многие студенты приходят именно за этим: разобраться в себе, наладить своё здоровье, питание своей семьи. Диплом при этом всё равно остаётся с вами — если позже решите брать клиентов, эта возможность уже будет открыта, доучиваться заново не придётся.»' },
+
+  { id:'attended_last_year', category:'Повторное прохождение',
+    triggers:['я уже проходил этот курс в прошлом году','зачем идти снова если уже был на потоке','я выпускник прошлого потока стоит ли повторно','уже получил диплом в прошлом году смысл ли идти опять'],
+    clarify:'«Здорово, что вы уже наш выпускник! Подскажите, что именно вас сейчас привлекло — новые темы, обновление знаний, или что-то конкретное из программы этого года?»',
+    response:'«Если вы уже прошли прошлый поток целиком и получили диплом — честно скажу, что скидки для повторного прохождения у нас нет, и смысла проходить весь курс заново тоже немного, если вас интересует тот же контент.\n\nВ этом сезоне добавился новый блок по составлению рационов питания — если именно он вам интересен, могу уточнить у команды, есть ли вариант получить доступ только к новому материалу.»' },
+
+  { id:'tax_deduction_obj', category:'Налоговый вычет',
+    triggers:['почему нет налогового вычета за обучение','как так нет вычета если это учеба','вычет можно получить или нет'],
+    clarify:'«Понимаю, вопрос справедливый. Подскажите, для вас это принципиальный момент при принятии решения, или один из вопросов среди прочих?»',
+    response:'«Налоговый вычет действительно недоступен — у РУДН как у вуза есть образовательная лицензия, но оплата идёт не напрямую в РУДН, а через нашего партнёра, и из-за этой схемы вычет сделать нельзя.\n\nВзамен курс даёт бонусы, которых нет напрямую у кафедры: приоритет в трудоустройстве, партнёрские бонусы на старте потока, дополнительные материалы.»' }
+];
+
+var objInput = document.getElementById('objInput');
+var objBtn = document.getElementById('objBtn');
+var objLoadingEl = document.getElementById('objLoading');
+var objResultEl = document.getElementById('objResult');
+var objCatEl = document.getElementById('objCat');
+var objClarifyEl = document.getElementById('objClarify');
+var objResponseEl = document.getElementById('objResponse');
+var objSuggestionsEl = document.getElementById('objSuggestions');
+
+function renderObjection(entry){
+  objResultEl.classList.add('show');
+  objSuggestionsEl.classList.remove('show');
+  objCatEl.textContent = entry.category;
+  revealWords(objClarifyEl, entry.clarify, function(){
+    while(objClarifyEl.querySelector('.copy-btn')) objClarifyEl.querySelector('.copy-btn').remove();
+    addCopyButton(objClarifyEl, function(){ return entry.clarify; });
+  });
+  revealWords(objResponseEl, entry.response, function(){
+    while(objResponseEl.querySelector('.copy-btn')) objResponseEl.querySelector('.copy-btn').remove();
+    addCopyButton(objResponseEl, function(){ return entry.response; });
+  });
+}
+
+function renderObjectionNoMatch(queryText, candidates){
+  objResultEl.classList.add('show');
+  objCatEl.textContent = 'Не найдено точно';
+  revealWords(objClarifyEl, 'В базе нет готовой отработки именно под эту формулировку.');
+  revealWords(objResponseEl, 'Отработайте по общему правилу из раздела «Отработка возражений»: сначала уточняющий вопрос, чтобы понять истинную причину, и только потом — аргумент. Не импровизируйте с фактами о дипломе, цене или гарантиях — при сомнении лучше уточнить у команды.');
+  if(candidates.length){
+    objSuggestionsEl.innerHTML = 'Похоже на:';
+    candidates.forEach(function(c){
+      var btn = document.createElement('button');
+      btn.textContent = c.entry.category + ' — «' + c.entry.triggers[0] + '»';
+      btn.addEventListener('click', function(){ runObjectionQuery(c.entry.triggers[0]); objInput.value = c.entry.triggers[0]; });
+      objSuggestionsEl.appendChild(btn);
+    });
+    objSuggestionsEl.classList.add('show');
+  } else {
+    objSuggestionsEl.classList.remove('show');
+  }
+}
+
+function runObjectionQuery(text){
+  fuzzySearchWithLoading({
+    query: text,
+    dataArray: OBJECTION_DATA,
+    matchThreshold: 0.5,
+    candidateThreshold: 0.25,
+    loadingEl: objLoadingEl,
+    btnEl: objBtn,
+    answerEl: objResultEl,
+    suggestionsEl: objSuggestionsEl,
+    onMatch: function(entry){ renderObjection(entry); },
+    onNoMatch: renderObjectionNoMatch
+  });
+}
+
+objBtn.addEventListener('click', function(){ runObjectionQuery(objInput.value); });
+objInput.addEventListener('keydown', function(e){
+  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); runObjectionQuery(objInput.value); }
+});
+document.querySelectorAll('.example-chips button').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var ex = btn.getAttribute('data-ex');
+    objInput.value = ex;
+    runObjectionQuery(ex);
+  });
+});
+</script>
+</body>
+</html>
